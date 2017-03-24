@@ -1,0 +1,389 @@
+<html>
+<head>
+<title>Project 0</title>
+<!--style type="text/css" href="project0.css"></style>-->
+<link rel="stylesheet" type="text/css" href="project0.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+    
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+    
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot">
+            <p id="scatterLabel">
+            
+            
+            </p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+	</div>
+    <style>/* taken from https://bl.ocks.org/mbostock/3885304*/
+        .bar {
+            fill: steelblue;
+        }
+        .bar:hover {
+            fill: brown;
+        }
+        /*adapted from above*/
+        .point {
+            fill: steelblue;
+        }
+        .point:hover {
+            fill: brown;
+        }
+        
+    </style>
+    
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+       
+        var filePath = ['./data/anscombe_I.csv', './data/anscombe_II.csv','./data/anscombe_III.csv','./data/anscombe_IV.csv']; // List of data files
+        
+        var index = 0
+        while (index<4){
+            d3.csv(filePath[index], function(csvData){
+                checkDataset(csvData);  
+            });
+              // Leave this to test your data uploading. All data uploading should be above this line
+            function checkDataset(dataset) {
+                if (dataset.length == 11)
+                    $("#partOne").append("<p>data loaded correctly</p>");
+                else
+                    $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+            }
+            index++;
+        }
+        // Put your part two code here ***********************
+        var w = 700; // Width of our visualization
+        var h = 500; // Height of our visualization
+        var xOffset = 100; // Space for x-axis labels
+        var yOffset = 50; // Space for y-axis labels
+        var margin = 10; // Margin around visualization
+        var vals = ['x', 'y']; // List of data attributes
+        var xVal = vals[0]; // Value to plot on x-axis
+        var yVal = vals[1]; // Value to plot on y-axis
+    
+        d3.csv(filePath[0], function(csvData){
+            //barchart
+        var data = csvData;
+        var minY = d3.min(data, function(d) {
+                        return parseFloat(d[xVal]);
+                    });
+        var maxY = d3.max(data, function(d) {
+                        return parseFloat(d[xVal]);
+                    });
+                    
+        var xScale = d3.scale.linear()
+                    .domain([0, data.length+1])
+                    .range([xOffset + margin, w - margin]);
+    
+        var yScale = d3.scale.linear()
+                    .domain([0, maxY+1])
+                    .range([h - yOffset - margin, margin]);
+    
+    // Next, we will create an SVG element to contain our visualization.
+    var svg = d3.select("#barchart").append("svg:svg")
+                                    .attr("width", w)
+                                    .attr("height", h);
+	
+
+	// Build axes! (These are kind of annoying, actually...)
+    // Specify the axis scale and general position
+    var xAxis = d3.svg.axis()
+                      .scale(xScale)
+                      .orient("bottom")
+                      .ticks(5);
+    
+    // Add a graphics element to hold the axis we created above (xAxis)
+    var xAxisG = svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(0, ' + (h - yOffset-10) + ')')
+                    .call(xAxis);
+    
+    // Add a label that shows the user what that axis represents
+    var xLabel = svg.append("text")
+                    .attr('class', 'label')
+                    .attr('x', w/2)
+                    .attr('y', h - margin/2)
+                    .text(xVal);
+    
+    // Repeat for the y-axis
+    var yAxis = d3.svg.axis()
+                      .scale(yScale)
+                      .orient("left")
+                      .ticks(5);
+    
+    var yAxisG = svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(' + (xOffset+10) + ', 0)')
+                    .call(yAxis);
+    
+    var yLabel = svg.append("text")
+                    .attr('class', 'label')
+                    .attr("transform", "rotate(-90)")
+                    .attr('y', xOffset/2)
+                    .attr('x',50 - (h / 2))
+                    //.attr('x', xOffset/2)
+                    //.attr('y', h/2)
+                    .text(yVal);
+    //there is a scale, dimension per unit of value in the y and x axis.
+    var scaleWidthBar = (xScale(data.length+1)-xScale(0))/(data.length+1);
+    var scaleHeightBar =(yScale(0)-yScale(maxY))/maxY;
+            
+    var bar = svg.selectAll(".bar")
+                .data(data);
+    bar.enter().append("svg:rect");
+    bar.attr("class", "bar")
+      .attr("x", function(d, i) { return (xScale(i+1)-scaleWidthBar/3.3); })//we want the index
+      .attr("y", function(d) { return yScale(d[xVal]); })
+      .attr("width", 30)
+      .attr("height", function(d) { return ((d[xVal])*scaleHeightBar); });
+            
+        });
+    
+        
+        // Put your part three & four code here ***********************
+       
+    //from scatterTutorial
+    d3.csv(filePath[0], function(csvData) {
+        var data = csvData;
+        var minY = d3.min(data, function(d) {
+                        return parseFloat(d[xVal]);
+                        });
+        var maxY = d3.max(data, function(d) {
+                            return parseFloat(d[xVal]);
+                        });
+        var minX = d3.min(data, function(d) {
+                            return parseFloat(d[xVal]);
+                        });
+        var maxX = d3.max(data, function(d) {
+                            return parseFloat(d[xVal]);
+                        });
+        var xScale = d3.scale.linear()
+                        .domain([0, maxX+1])
+                        .range([xOffset + margin, w - margin]);
+
+        var yScale = d3.scale.linear()
+                        .domain([0, maxY+1])
+                        .range([h - yOffset - margin, margin]);
+
+        // Next, we will create an SVG element to contain our visualization.
+        var svg = d3.select("#scatterplot").append("svg:svg")
+                                        .attr("width", w)
+                                        .attr("height", h);
+
+        // Build axes! (These are kind of annoying, actually...)
+        // Specify the axis scale and general position
+        var xAxis = d3.svg.axis()
+                          .scale(xScale)
+                          .orient("bottom")
+                          .ticks(5);
+
+        // Add a graphics element to hold the axis we created above (xAxis)
+        var xAxisG = svg.append('g')
+                        .attr('class', 'axis')
+                        .attr('transform', 'translate(0, ' + (h - yOffset-10) + ')')
+                        .call(xAxis);
+
+        // Add a label that shows the user what that axis represents
+        var xLabel = svg.append("text")
+                        .attr('class', 'label')
+                        .attr('x', w/2)
+                        .attr('y', h - margin/2)
+                        .text(xVal);
+
+        // Repeat for the y-axis
+        var yAxis = d3.svg.axis()
+                          .scale(yScale)
+                          .orient("left")
+                          .ticks(5);
+
+        var yAxisG = svg.append('g')
+                        .attr('class', 'axis')
+                        .attr('transform', 'translate(' + (xOffset+10) + ', 0)')
+                        .call(yAxis);
+
+        var yLabel = svg.append("text")
+                        .attr('class', 'label')
+                        .attr("transform", "rotate(-90)")
+                        .attr('y', xOffset/2)
+                        .attr('x',50 - (h / 2))
+                        //.attr('x', xOffset/2)
+                        //.attr('y', h/2)
+                        .text(yVal);
+
+        // Now, we will start actually building our scatterplot!
+            // Select elements
+            // Bind data to elements
+        var point = svg.selectAll(".point")
+                        .data(data);
+                // Create new elements if needed
+        point.enter().append("svg:circle")
+                    .append("svg:title") // TITLE APPENDED HERE from https://chartio.com/resources/tutorials/how-to-show-data-on-mouseover-in-d3js/ 
+                    .text(function(d) { return d[xVal]+", "+d[yVal]; });
+                // Update our selection
+                //.on
+        point.attr("class","point")
+                    .attr("cx", function(d){return xScale(d[xVal]);})
+                    .attr("cy", function(d){return yScale(d[yVal]);})
+                    .attr("r",5);
+                 
+    });       
+        
+        // Put your part five code here ***********************
+    var w1 = 200; // Width of our visualization
+    var h1 = 150; // Height of our visualization
+    xOffset = 50; // Space for x-axis labels
+    yOffset = 50; // Space for y-axis labels
+    margin = 10; // Margin around visualization   
+    
+    
+   
+    var index = 0;
+    //while (index < 4)//I tried this loop without succes...
+    //{
+        var filenames = ["Anscombe_I", "Anscombe_II", "Anscombe_III", "Anscombe_IV"];
+        //console.log(filenames[0]);
+        //var title = filenames[index];
+        //console.log(index);   
+        //console.log(title); 
+     
+        d3.csv(filePath[0], function(csvData){
+                scatterplotSet(csvData,filenames[0],0);  
+            });
+        
+        d3.csv(filePath[1], function(csvData){
+                scatterplotSet(csvData,filenames[1],1);  
+            });
+        d3.csv(filePath[2], function(csvData){
+                scatterplotSet(csvData,filenames[2],2);  
+            });
+        d3.csv(filePath[3], function(csvData){
+                scatterplotSet(csvData,filenames[3],3);  
+            });
+              // Leave this to test your data uploading. All data uploading should be above this line
+         
+        
+            function scatterplotSet(dataset,filename,index) {
+                console.log(index);   
+                console.log(filenames[index]); 
+       // d3.csv(filePath[index], function(csvData) {
+             
+            var data = dataset;
+            var minY = d3.min(data, function(d) {
+                    return parseFloat(d[xVal]);
+                    });
+            var maxY = d3.max(data, function(d) {
+                        return parseFloat(d[xVal]);
+                    });
+            var minX = d3.min(data, function(d) {
+                        return parseFloat(d[xVal]);
+                    });
+            var maxX = d3.max(data, function(d) {
+                        return parseFloat(d[xVal]);
+                    });
+            var xScale = d3.scale.linear()
+                    .domain([0, maxX+1])
+                    .range([xOffset + margin, w1 - margin]);
+    
+            var yScale = d3.scale.linear()
+                    .domain([0, maxY+1])
+                    .range([h1 - yOffset - margin, margin]);
+    
+            // Next, we will create an SVG element to contain our visualization.
+            var svg = d3.select("#scatterplotSet").append("svg:svg")
+                                    .attr("width", w1)
+                                    .attr("height", h1);
+            //from http://www.d3noob.org/2013/01/adding-title-to-your-d3js-graph.html
+                                svg.append("text")
+                                    .attr('x', (w1 / 2))             
+                                    .attr('y', margin)
+                                   //.text('Anscombe_II');
+                                    .text(filename);
+                               
+
+	       // Build axes! (These are kind of annoying, actually...)
+            // Specify the axis scale and general position
+            var xAxis = d3.svg.axis()
+                    .scale(xScale)
+                    .orient("bottom")
+                    .ticks(5);
+    
+            // Add a graphics element to hold the axis we created above (xAxis)
+            var xAxisG = svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(0, ' + (h1 - yOffset-10) + ')')
+                    .call(xAxis);
+    
+            // Add a label that shows the user what that axis represents
+            var xLabel = svg.append("text")
+                    .attr('class', 'label')
+                    .attr('x', w1/2+25)
+                    .attr('y', h1 - xOffset/2)
+                    .text(xVal);
+    
+            // Repeat for the y-axis
+            var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left")
+                    .ticks(5);
+    
+            var yAxisG = svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(' + (xOffset+10) + ', 0)')
+                    .call(yAxis);
+    
+            var yLabel = svg.append("text")
+                    .attr('class', 'label')
+                    .attr("transform", "rotate(-90)")
+                    .attr('y', xOffset/2)
+                    .attr('x', 30 - (h1 / 2))
+                    //.attr('x', xOffset/2)
+                    //.attr('y', h/2)
+                    .text(yVal);
+
+	      // Now, we will start actually building our scatterplot!
+		  // Select elements
+		  // Bind data to elements
+            var point = svg.selectAll(".point")
+                .data(data);
+		// Create new elements if needed
+            point.enter().append("svg:circle")
+                .append("svg:title") // TITLE APPENDED HERE from https://chartio.com/resources/tutorials/how-to-show-data-on-mouseover-in-d3js/ 
+                .text(function(d) { return d[xVal]+", "+d[yVal]; });
+		// Update our selection
+    
+            point.attr("class","point")
+                .attr("cx", function(d){return xScale(d[xVal]);})
+                .attr("cy", function(d){return yScale(d[yVal]);})
+                .attr("r",3)
+           
+       // });
+            //}
+         //index++;
+    }     
+        
+        
+    </script>
+</body>
+
+
+</html>

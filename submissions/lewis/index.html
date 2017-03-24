@@ -1,0 +1,491 @@
+<html>
+	<head>
+		<title>Project 0</title>
+		<style type="text/css" href="project0.css"></style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<!--Put your D3 import statement between these two lines-->
+		<script src="https://d3js.org/d3.v3.min.js"></script>
+		<!--Put your D3 import statement between these two lines-->
+	</head>
+
+	<body>
+		<div id="partOne">
+			<h1>Part One: </h1>
+		</div>
+
+		<div id="partTwo">
+			<h1>Part Two: </h1>
+			<div id="barchart">
+			</div>
+		</div>
+
+		<div id="partThree">
+			<h1>Part Three &amp; Four: </h1>
+			<div id="scatterplot">
+				<p id="scatterLabel"></p>
+			</div>
+		</div>
+
+		<div id="partFive">
+			<h1>Part Five: </h1>
+			<div id="scatterplotSet">
+			</div>
+		</div>
+
+		<script type="text/javascript">
+var vals = ['x', 'y'];
+var w = 700;
+var h = 500;
+var xOffset = 40;
+var yOffset = 80;
+var margin = 10;
+var xVal = vals[0];
+var yVal = vals[1];
+// Put your part one code here ***********************
+d3.csv('data/anscombe_I.csv', function(csvData1) {	
+	d3.csv('data/anscombe_II.csv', function(csvData2) {
+		d3.csv('data/anscombe_III.csv', function(csvData3) {
+			d3.csv('data/anscombe_IV.csv', function(csvData4) {
+				data1 = csvData1;
+				data2 = csvData2;
+				data3 = csvData3;
+				data4 = csvData4;
+				checkDataset(data1);
+				checkDataset(data2);
+				checkDataset(data3);
+				checkDataset(data4);
+			})
+		})
+	})
+})
+// Leave this to test your data uploading. All data uploading should be above this line
+function checkDataset(dataset) {
+	if (dataset.length == 11)
+		$("#partOne").append("<p>data loaded correctly</p>");
+	else
+		$("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+}
+
+// Put your part two code here ***********************
+d3.csv('data/anscombe_I.csv', function(csvData1) {
+	w = 500;
+	h = 500;
+	data1 = csvData1;
+	xScale = d3.scale.linear()
+		.domain([0, d3.max(data1, function(d) {
+			return parseFloat(d[xVal]);
+		})+1])
+	.range([xOffset + margin, w - margin]);
+	yScale = d3.scale.linear()
+		.domain([0, d3.max(data1, function(d) {
+			return parseFloat(d[xVal]);
+		})+1])
+	.range([h - yOffset - margin, margin]);
+	var svg = d3.select("#barchart")
+		.append("svg:svg")
+		.attr("width", w)
+		.attr("height", h);
+	var xAxis = d3.svg.axis()
+		.scale(xScale)
+		.orient("bottom")
+		.ticks(5);
+	var xAxisG = svg.append('g')
+		.attr('class', 'axis')
+		.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+				.call(xAxis);
+				var xLabel = svg.append('text')
+				.attr('class', 'label')
+				.attr('x', w/2)
+				.attr('y', (h-40))
+				.text(xVal);
+				var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+				var yAxisG = svg.append('g')
+				.attr('class', 'axis')
+				.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+				.call(yAxis);
+				var yLabel = svg.append('text')
+				.attr('class', 'label')
+				.attr('x', xOffset/2)
+				.attr('y', h/2)
+				.text(xVal);
+				var bar = svg.selectAll('.bar')
+					.data(data1)
+
+					bar.enter().append("rect")
+					.attr('transform', function(d) {return 'translate(' + xScale(d[xVal]) + ',0)';})
+					.attr('y', function(d) {
+						return yScale(d[xVal]);
+					})
+				.attr('width', 19)
+					.attr('height', function(d) {return h - yOffset - margin - yScale(d[xVal]);})
+					//y-values bar graph
+					xScale = d3.scale.linear()
+					.domain([0, d3.max(data1, function(d) {
+						return parseFloat(d[yVal]);
+					})+1])
+				.range([xOffset + margin, w - margin]);
+				yScale = d3.scale.linear()
+					.domain([0, d3.max(data1, function(d) {
+						return parseFloat(d[yVal]);
+					})+1])
+				.range([h - yOffset - margin, margin]);
+				var svg = d3.select("#barchart")
+					.append("svg:svg")
+					.attr("width", w)
+					.attr("height", h);
+				var xAxis = d3.svg.axis()
+					.scale(xScale)
+					.orient("bottom")
+					.ticks(5);
+				var xAxisG = svg.append('g')
+					.attr('class', 'axis')
+					.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+							.call(xAxis);
+							var xLabel = svg.append('text')
+							.attr('class', 'label')
+							.attr('x', w/2)
+							.attr('y', (h-40))
+							.text(yVal);
+							var yAxis = d3.svg.axis()
+							.scale(yScale)
+							.orient("left")
+							.ticks(5);
+							var yAxisG = svg.append('g')
+							.attr('class', 'axis')
+							.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+							.call(yAxis);
+							var yLabel = svg.append('text')
+							.attr('class', 'label')
+							.attr('x', xOffset/2)
+							.attr('y', h/2)
+							.text(yVal);
+							var bar = svg.selectAll('.bar')
+								.data(data1)
+								bar.enter().append("rect")
+								.attr('transform', function(d) {return 'translate(' + xScale(d[yVal]) + ',0)';})
+								.attr('y', function(d) {
+									return yScale(d[yVal]);
+								})
+							.attr('width', 19)
+								.attr('height', function(d) {return h - yOffset - margin - yScale(d[yVal]);})
+})
+// Put your part three & four code here ***********************
+d3.csv('data/anscombe_I.csv', function(csvData1) {
+	data1 = csvData1;
+	xScale = d3.scale.linear()
+		.domain([0, d3.max(data1, function(d) {
+			return parseFloat(d[xVal]);
+		})+1])
+	.range([xOffset + margin, w - margin]);
+	yScale = d3.scale.linear()
+		.domain([0, d3.max(data1, function(d) {
+			return parseFloat(d[yVal]);
+		})+1])
+	.range([h - yOffset - margin, margin]);
+	var svg = d3.select("#scatterplot")
+		.append("svg:svg")
+		.attr("width", w)
+		.attr("height", h);
+	var xAxis = d3.svg.axis()
+		.scale(xScale)
+		.orient("bottom")
+		.ticks(5);
+	var xAxisG = svg.append('g')
+		.attr('class', 'axis')
+		.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+				.call(xAxis);
+				var xLabel = svg.append('text')
+				.attr('class', 'label')
+				.attr('x', w/2)
+				.attr('y', (h-40))
+				.text(xVal);
+				var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+				var yAxisG = svg.append('g')
+				.attr('class', 'axis')
+				.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+				.call(yAxis);
+				var yLabel = svg.append('text')
+				.attr('class', 'label')
+				.attr('x', xOffset/2)
+				.attr('y', h/2)
+				.text(yVal);
+
+				var point = svg.selectAll(".point")
+					.data(data1);
+				point.enter().append("svg:circle")
+					.attr('class', 'points')
+					.attr('cx', function(d) {return xScale(d[xVal])})
+					.attr('cy', function(d) {return yScale(d[yVal])})
+					.attr('r', 8)
+					.on("mouseover", handleMouseOver)
+					.on("mouseout", handleMouseOut)
+					.on("click", handleClick);
+				point.append("svg:title")
+					.text(function(d) {return d['x']+', '+d['y'];});
+
+				function handleMouseOver(d, i) {
+					d3.select(this).attr({
+						fill: "blue"
+					});
+				}
+				function handleMouseOut(d, i) {
+					d3.select(this).attr({
+						fill: "black"
+					});
+				}
+				function handleClick(d) {
+					var xx = d[xVal];
+					var yy = d[yVal];
+					var totall = xx + ', ' + yy;
+					document.getElementById("scatterLabel").innerHTML = totall; 
+				}
+})
+
+// Put your part five code here ***********************
+d3.csv('data/anscombe_I.csv', function(csvData1) {  
+	d3.csv('data/anscombe_II.csv', function(csvData2) {
+		d3.csv('data/anscombe_III.csv', function(csvData3) {
+			d3.csv('data/anscombe_IV.csv', function(csvData4) {
+				data1 = csvData1;
+				data2 = csvData2;
+				data3 = csvData3;
+				data4 = csvData4;
+
+				w = 200, h = 200;
+				//anscombe I
+				xScale1 = d3.scale.linear()
+					.domain([0, d3.max(data1, function(d) {
+						return parseFloat(d[xVal]);
+					})+1])
+				.range([xOffset + margin, w - margin]);
+				yScale1 = d3.scale.linear()
+					.domain([0, d3.max(data1, function(d) {
+						return parseFloat(d[yVal]);
+					})+1])
+				.range([h - yOffset - margin, margin]);
+				var svg1 = d3.select("#partFive")
+					.append("svg:svg")
+					.attr("width", w)
+					.attr("height", h);
+				var xAxis1 = d3.svg.axis()
+					.scale(xScale1)
+					.orient("bottom")
+					.ticks(5);
+				var xAxisG1 = svg1.append('g')
+					.attr('class', 'axis')
+					.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+							.call(xAxis1);
+							var xLabel1 = svg1.append('text')
+							.attr('class', 'label')
+							.attr('x', w/2)
+							.attr('y', (h-40))
+							.text(xVal);
+							var yAxis1 = d3.svg.axis()
+							.scale(yScale1)
+							.orient("left")
+							.ticks(5);
+							var yAxisG1 = svg1.append('g')
+							.attr('class', 'axis')
+							.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+							.call(yAxis1);
+							var yLabel1 = svg1.append('text')
+							.attr('class', 'label')
+							.attr('x', xOffset/2)
+							.attr('y', h/2)
+							.text(yVal);
+
+							var point = svg1.selectAll(".point")
+								.data(data1);
+							point.enter().append("svg:circle")
+								.attr('class', 'points')
+								.attr('cx', function(d) {return xScale1(d[xVal])})
+								.attr('cy', function(d) {return yScale1(d[yVal])})
+								.attr('r', 4);
+							svg1.append("text")
+								.attr("x", (w / 2))             
+								.attr("y", (h / 15))
+								.attr("text-anchor", "middle")  
+								.style("font-size", "16px") 
+								.text("Anscombe I");
+
+							//anscombe II
+							xScale2 = d3.scale.linear()
+								.domain([0, d3.max(data2, function(d) {
+									return parseFloat(d[xVal]);
+								})+1])
+							.range([xOffset + margin, w - margin]);
+							yScale2 = d3.scale.linear()
+								.domain([0, d3.max(data2, function(d) {
+									return parseFloat(d[yVal]);
+								})+1])
+							.range([h - yOffset - margin, margin]);
+							var svg2 = d3.select("#partFive")
+								.append("svg:svg")
+								.attr("width", w)
+								.attr("height", h);
+							var xAxis2 = d3.svg.axis()
+								.scale(xScale2)
+								.orient("bottom")
+								.ticks(5);
+							var xAxisG2 = svg2.append('g')
+								.attr('class', 'axis')
+								.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+										.call(xAxis2);
+										var xLabel2 = svg2.append('text')
+										.attr('class', 'label')
+										.attr('x', w/2)
+										.attr('y', (h-40))
+										.text(xVal);
+										var yAxis2 = d3.svg.axis()
+										.scale(yScale2)
+										.orient("left")
+										.ticks(5);
+										var yAxisG2 = svg2.append('g')
+										.attr('class', 'axis')
+										.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+										.call(yAxis2);
+										var yLabel2 = svg2.append('text')
+										.attr('class', 'label')
+										.attr('x', xOffset/2)
+										.attr('y', h/2)
+										.text(yVal);
+
+										var point = svg2.selectAll(".point")
+											.data(data2);
+										point.enter().append("svg:circle")
+											.attr('class', 'points')
+											.attr('cx', function(d) {return xScale2(d[xVal])})
+											.attr('cy', function(d) {return yScale2(d[yVal])})
+											.attr('r', 4);
+										svg2.append("text")
+											.attr("x", (w / 2))             
+											.attr("y", (h / 15))
+											.attr("text-anchor", "middle")  
+											.style("font-size", "16px") 
+											.text("Anscombe II");
+										//anscombe III
+										xScale3 = d3.scale.linear()
+											.domain([0, d3.max(data3, function(d) {
+												return parseFloat(d[xVal]);
+											})+1])
+										.range([xOffset + margin, w - margin]);
+										yScale3 = d3.scale.linear()
+											.domain([0, d3.max(data3, function(d) {
+												return parseFloat(d[yVal]);
+											})+1])
+										.range([h - yOffset - margin, margin]);
+										var svg3 = d3.select("#partFive")
+											.append("svg:svg")
+											.attr("width", w)
+											.attr("height", h);
+										var xAxis3 = d3.svg.axis()
+											.scale(xScale1)
+											.orient("bottom")
+											.ticks(5);
+										var xAxisG3 = svg3.append('g')
+											.attr('class', 'axis')
+											.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+													.call(xAxis3);
+													var xLabel3 = svg3.append('text')
+													.attr('class', 'label')
+													.attr('x', w/2)
+													.attr('y', (h-40))
+													.text(xVal);
+													var yAxis3 = d3.svg.axis()
+													.scale(yScale3)
+													.orient("left")
+													.ticks(5);
+													var yAxisG3 = svg3.append('g')
+													.attr('class', 'axis')
+													.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+													.call(yAxis3);
+													var yLabel3 = svg3.append('text')
+													.attr('class', 'label')
+													.attr('x', xOffset/2)
+													.attr('y', h/2)
+													.text(yVal);
+
+													var point = svg3.selectAll(".point")
+														.data(data3);
+													point.enter().append("svg:circle")
+														.attr('class', 'points')
+														.attr('cx', function(d) {return xScale1(d[xVal])})
+														.attr('cy', function(d) {return yScale1(d[yVal])})
+														.attr('r', 4);
+													svg3.append("text")
+														.attr("x", (w / 2))             
+														.attr("y", (h / 15))
+														.attr("text-anchor", "middle")  
+														.style("font-size", "16px") 
+														.text("Anscombe III");
+
+													//anscombe IV
+													xScale4 = d3.scale.linear()
+														.domain([0, d3.max(data4, function(d) {
+															return parseFloat(d[xVal]);
+														})+1])
+													.range([xOffset + margin, w - margin]);
+													yScale4 = d3.scale.linear()
+														.domain([0, d3.max(data4, function(d) {
+															return parseFloat(d[yVal]);
+														})+1])
+													.range([h - yOffset - margin, margin]);
+													var svg4 = d3.select("#partFive")
+														.append("svg:svg")
+														.attr("width", w)
+														.attr("height", h);
+													var xAxis4 = d3.svg.axis()
+														.scale(xScale4)
+														.orient("bottom")
+														.ticks(5);
+													var xAxisG4 = svg4.append('g')
+														.attr('class', 'axis')
+														.attr('transform', 'translate(0, ' + (h - yOffset - margin) + ')')
+																.call(xAxis4);
+																var xLabel4 = svg4.append('text')
+																.attr('class', 'label')
+																.attr('x', w/2)
+																.attr('y', (h-40))
+																.text(xVal);
+																var yAxis4 = d3.svg.axis()
+																.scale(yScale4)
+																.orient("left")
+																.ticks(5);
+																var yAxisG4 = svg4.append('g')
+																.attr('class', 'axis')
+																.attr('transform', 'translate(' +(xOffset+margin)+',0)')
+																.call(yAxis4);
+																var yLabel4 = svg4.append('text')
+																.attr('class', 'label')
+																.attr('x', xOffset/2)
+																.attr('y', h/2)
+																.text(yVal);
+
+																var point = svg4.selectAll(".point")
+																	.data(data4);
+																point.enter().append("svg:circle")
+																	.attr('class', 'points')
+																	.attr('cx', function(d) {return xScale1(d[xVal])})
+																	.attr('cy', function(d) {return yScale1(d[yVal])})
+																	.attr('r', 4);
+																svg4.append("text")
+																	.attr("x", (w / 2))             
+																	.attr("y", (h / 15))
+																	.attr("text-anchor", "middle")  
+																	.style("font-size", "16px") 
+																	.text("Anscombe IV");
+			})
+		})
+	})
+})
+		</script>
+	</body>
+
+
+</html>

@@ -1,0 +1,156 @@
+<html>
+<head>
+<title>Project 0</title>
+<style type="text/css" href="project0.css"></style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+     <script src="d3/d3/.v3.js"></script>
+
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+    
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+    
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+	</div>
+    
+    <script type="text/javascript">
+
+        // Put your part one code here ***********************
+
+        d3.csv("/data/anscombe_I.csv", function(data) {
+            var data_1 = data;
+            checkDataset(data_1); });
+        
+        d3.csv("/data/anscombe_II.csv", function(data2) {
+            var data_2 = data2;
+            checkDataset(data_2); });
+        
+        d3.csv("/data/anscombe_III.csv", function(data3) {
+            var data_3 = data3;
+            checkDataset(data_3); });
+        
+        d3.csv("/data/anscombe_IV.csv", function(data4) {
+            var data_4 = data4;
+            checkDataset(data_4);  });
+
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+
+
+        // Put your part two code here ***********************
+        // Got this from class
+
+        d3.csv("/data/anscombe_I.csv",function(csvData){
+        var data = csvData;
+
+        var w = 700; 
+        var h = 500; 
+        var x_Offset = 100; 
+        var y_Offset = 50; 
+        var margin = 10; 
+        var vals = ['x', 'y']; 
+        var x_Val = vals[0]; 
+        var y_Val = vals[1]; 
+
+
+        d3.csv(filePath[0], function(csvData){
+            //barchart
+        var data = csvData;
+        var min_Y = d3.min(data, function(d) {
+                        return parseFloat(d[x_Val]); });
+        var max_Y = d3.max(data, function(d) {
+                        return parseFloat(d[x_Val]); });
+                    
+        var x_Scale = d3.scale.linear()
+                    .domain([0, data.length + 1])
+                    .range([x_Offset + margin, w - margin]);
+    
+        var y_Scale = d3.scale.linear()
+                    .domain([0, max_Y + 1])
+                    .range([h - y_Offset - margin, margin]);
+    
+        var x_Axis = d3.svg.axis()
+                      .scale(x_Scale)
+                      .orient("bottom")
+                      .ticks(8);
+
+        var x_Axis_1 = svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(0, ' + (h y_Offset-3) + ')')
+                    .call(xAxis);
+        
+        // Put your part three & four code here ***********************
+        d3.csv("/data/anscombe_I.csv",function(csvData){
+        var data = csvData;
+
+        var w = 700; 
+        var h = 500; 
+        var x_Offset = 100; 
+        var y_Offset = 50; 
+        var margin = 10; 
+        var vals = ['x', 'y']; 
+        var x_Val = vals[0]; 
+        var y_Val = vals[1]; 
+
+
+        d3.csv(filePath[0], function(csvData){
+            //barchart
+        var data = csvData;
+        var min_Y = d3.min(data, function(d) {
+                        return parseFloat(d[x_Val]); });
+        var max_Y = d3.max(data, function(d) {
+                        return parseFloat(d[x_Val]); });
+                    
+        var x_Scale = d3.scale.linear()
+                    .domain([0, data.length + 1])
+                    .range([x_Offset + margin, w - margin]);
+    
+        var y_Scale = d3.scale.linear()
+                    .domain([0, max_Y + 1])
+                    .range([h - y_Offset - margin, margin]);
+    
+        var x_Axis = d3.svg.axis()
+                      .scale(x_Scale)
+                      .orient("bottom")
+                      .ticks(8);
+
+        var x_Axis_1 = svg.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(0, ' + (h y_Offset-3) + ')')
+                    .call(xAxis);
+
+
+        
+        // Put your part five code here ***********************
+        
+    </script>
+</body>
+
+
+</html>

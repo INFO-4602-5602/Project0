@@ -1,0 +1,886 @@
+<html>
+<head>
+<title>Project 0</title>
+<style type="text/css" href="project0.css"></style>
+<style>
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+.bar:hover{
+	fill:yellow;
+}
+.scatter-points:hover{
+	fill:red;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+	<script src='./regression.min.js' type='text/javascript'></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body bgcolor='#ffe699'>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot" style="margin: 30;">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+            <div id='group1'></div>
+            <div id='group2'></div>
+        </div>
+	</div>
+	<div id='partSix'>
+		<h1>Whistle: Transitions</h1>
+		<div id='buttons'>
+			<div id="option">
+				<input name="updateButton" 
+					   type="button" 
+					   value="Chart 1" 
+					   onclick="updateData1()" />
+				<input name="updateButton" 
+					   type="button" 
+					   value="Chart 2" 
+					   onclick="updateData2()" />
+				<input name="updateButton" 
+					   type="button" 
+					   value="Chart 3" 
+					   onclick="updateData3()" />
+				<input name="updateButton" 
+					   type="button" 
+					   value="Chart 4" 
+					   onclick="updateData4()" />
+			</div>
+		</div>
+		<div id='Part_Transitions'></div>
+	</div>
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+		d3.csv("data/anscombe_I.csv", function(csvdata){
+			checkDataset(csvdata);});
+		d3.csv("data/anscombe_II.csv", function(csvdata){
+			checkDataset(csvdata);});
+		d3.csv("data/anscombe_III.csv", function(csvdata){
+			checkDataset(csvdata);});
+		d3.csv("data/anscombe_IV.csv", function(csvdata){
+			checkDataset(csvdata);});
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>" + parseFloat(dataset.length));
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+
+        //Define frame of SVG
+        var w = 350;// Width of our visualization
+        var h = 250;// Height of our visualization
+        var xOffset = 20;// Space for x-axis labels
+        var yOffset = 50;// Space for y-axis labels
+        var margin = 10;// Margin around visualization
+        var vals = ['x', 'y'];// List of data attributes
+        var xVal = vals[0];// Value to plot on x-axis
+        var yVal = vals[1];// Value to plot on y-axis
+
+        // Put your part two code here ***********************
+        //https://bl.ocks.org/mbostock/3885304
+        d3.csv('data/anscombe_I.csv', function(csvdata){
+            var data = csvdata;
+            var xScale = d3.scale.linear()
+        					.domain([0, data.length+1])
+        					.range([xOffset - 5, w - margin]); // project domain to the pixal on the browser screen
+            var yScale = d3.scale.linear()
+                            .domain([d3.min(data, function(d){
+                                return parseFloat(d[xVal]);
+                            })-1, d3.max(data, function(d){
+                                return parseFloat(d[xVal]);
+                            })+1])
+                            .range([h - yOffset + 5, 0]);
+
+            var svg = d3.select("#barchart")
+                        .append("svg:svg")
+                        .attr("width", w)
+                        .attr("height", h).style('margin',margin);
+
+            var xAxis = d3.svg.axis()
+        					.scale(xScale)
+        					.orient('bottom')
+        					.ticks(5);
+        	var xAxisG = svg.append('g')
+        					.attr('class','axis')
+        					.attr('transform','translate(0,'+(h-yOffset)+')')
+        					.call(xAxis);
+        	var xLabel = svg.append('text')
+        					.attr('class','label')
+        					.attr('x',w/2)
+        					.attr('y',h-margin/2)
+        					.text("Index");
+
+        	var yAxis = d3.svg.axis()
+        					.scale(yScale)
+        					.orient('left')
+        					.ticks(5);
+        	var yAxisG = svg.append('g')
+        					.attr('class','axis')
+        					.attr('transform','translate('+(xOffset)+',0)')
+        					.call(yAxis);
+        	var yLabel = svg.append('text')
+        					.attr('class','label')
+        					.attr('x',xOffset/2)
+        					.attr('y',h/2)
+        					.text(xVal);
+
+			//Tool tip code
+			// Reference:http://bl.ocks.org/mstanaland/6100713
+			var tooltip = svg.append('g')
+				.attr('class', 'tooltip').style('display', 'none');
+			tooltip.append('rect').attr('width', 30)
+				.attr('height', 20)
+				.attr('fill', 'lightblue')
+				.style('opacity',0.6);
+			tooltip.append('text')
+				.attr('x', 15)
+				.attr('dy', '1.2em')
+				.style('text-anchor', 'middle')
+				.attr('font-size', '16px').attr('position','absolute')
+				.attr('font-weight','bold').attr('z-index', '1');
+
+            svg.selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+				.attr('id','xbar')
+                .attr("x", function(d,i) { return xScale(i)-margin; })
+                .attr("y", function(d) { return yScale(parseFloat(d.x)); })
+                .attr("width", 20)
+                .attr("height", function(d) {return h - yScale(parseFloat(d.x)) - yOffset;})
+                .attr("fill", "steelblue")
+				.on("mouseout", function() { tooltip.style("display", "none"); })
+				.on('mouseover', function(d){
+					var xPosition = d3.mouse(this)[0]+10;
+					var yPosition = d3.mouse(this)[1]-10;
+					tooltip.attr('transform', 'translate(' + xPosition + ',' + yPosition + ')');
+					tooltip.select('text').text(d.x);
+					tooltip.style('display', 'inline');
+				});
+        });
+		
+		// For Y Value: Bell: Xs and Ys
+		d3.csv('data/anscombe_I.csv', function(csvdata){
+            var data = csvdata;
+            var xScale = d3.scale.linear()
+        					.domain([0, data.length+1])
+        					.range([xOffset - 5, w - margin]); // project domain to the pixal on the browser screen
+            var yScale = d3.scale.linear()
+                            .domain([d3.min(data, function(d){
+                                return parseFloat(d[yVal]);
+                            })-1, d3.max(data, function(d){
+                                return parseFloat(d[yVal]);
+                            })+1])
+                            .range([h - yOffset + 5, 0]);
+
+            var svg = d3.select("#barchart")
+                        .append("svg:svg")
+                        .attr("width", w)
+                        .attr("height", h).style('margin',margin);
+
+            var xAxis = d3.svg.axis()
+        					.scale(xScale)
+        					.orient('bottom')
+        					.ticks(5);
+        	var xAxisG = svg.append('g')
+        					.attr('class','axis')
+        					.attr('transform','translate(0,'+(h-yOffset)+')')
+        					.call(xAxis);
+        	var xLabel = svg.append('text')
+        					.attr('class','label')
+        					.attr('x',w/2)
+        					.attr('y',h-margin/2)
+        					.text("Index");
+
+        	var yAxis = d3.svg.axis()
+        					.scale(yScale)
+        					.orient('left')
+        					.ticks(5);
+        	var yAxisG = svg.append('g')
+        					.attr('class','axis')
+        					.attr('transform','translate('+(xOffset)+',0)')
+        					.call(yAxis);
+        	var yLabel = svg.append('text')
+        					.attr('class','label')
+        					.attr('x',xOffset/2)
+        					.attr('y',h/2)
+        					.text(yVal);
+			
+            svg.selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar1")
+                .attr("x", function(d,i) { return xScale(i) + margin + 5; })
+                .attr("y", function(d) { return yScale(parseFloat(d.y)); })
+                .attr("width", 20)
+                .attr("height", function(d) {return h - yScale(parseFloat(d.y)) - yOffset;})
+                .attr("fill", "steelblue")
+				// Whistle: Coordinated Views
+				.on("mouseover", function(d,i){
+					d3.selectAll('#xbar')
+						.filter(function(dd,ii){return ii == i;})
+						.attr('fill','red');
+				})
+				.on("mouseout", function(d,i){
+					d3.selectAll('#xbar')
+						.filter(function(dd,ii){return ii == i;})
+						.attr('fill','steelblue');
+				});
+        });
+
+
+        // Put your part three & four code here ***********************
+        //Reference http://bl.ocks.org/bunkat/2595950
+        d3.csv('data/anscombe_I.csv', function(csvdata){
+            var data = csvdata;
+            var width = 480;
+            var height = 250;
+            var scatterX = d3.scale.linear()
+                .domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+                .range([0, width]);
+            var scatterY = d3.scale.linear()
+                .domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+                .range([height, 0]);
+
+            var scatter = d3.select("#scatterplot")
+                .append('svg:svg')
+                .attr('width', width + margin * 2)
+                .attr('height', height + margin * 2)
+                .attr('class', 'scatter');
+
+            var main = scatter.append('g')
+                .attr('transform', 'translate(' + 10 + ',' + 10 +')')
+                .attr('width', width)
+                .attr('height', height)
+                .attr('class', 'main');
+
+            var xAxis_scatter = d3.svg.axis().scale(scatterX).orient('bottom');
+            main.append('g').attr('transform', 'translate(15,' + (height-margin) + ')')
+                .attr('class', 'main_axis')
+                .call(xAxis_scatter);
+
+            var yAxis_scatter = d3.svg.axis().scale(scatterY).orient('left');
+            main.append('g').attr('transform', 'translate(15,-4)')
+                .attr('class', 'main_axis').call(yAxis_scatter);
+			
+			//Tool tip code: Bell: Tooltips
+			// Reference:http://bl.ocks.org/mstanaland/6100713
+			var tooltip = main.append('g')
+				.attr('class', 'tooltip').style('display', 'none');
+			tooltip.append('rect').attr('width', 60)
+				.attr('height', 20)
+				.attr('fill', 'lightblue')
+				.style('opacity',0.6);
+			tooltip.append('text')
+				.attr('x', 25)
+				.attr('dy', '1.2em')
+				.style('text-anchor', 'middle')
+				.attr('font-size', '16px')
+				.attr('font-weight','bold');
+
+            var g = main.append('svg:g');
+            g.selectAll("scatter-dots")
+                .data(data).enter()
+                .append('svg:circle')
+				.attr('class','scatter-points')
+                .attr('cx', function(d){return scatterX(parseFloat(d.x) );})
+                .attr('cy', function(d){return scatterY(parseFloat(d.y));})
+                .attr('r', 8)
+				.attr('fill','blue')
+				.on("mouseout", function() { tooltip.style("display", "none"); })
+				.on('mouseover', function(d){
+					var xPosition = d3.mouse(this)[0]+5;
+					var yPosition = d3.mouse(this)[1]-5;
+					tooltip.attr('transform', 'translate(' + xPosition + ',' + yPosition + ')');
+					tooltip.select('text').text(d.x + ', ' + d.y);
+					tooltip.style('display', 'inline');
+				})
+                .on("click", function(d) {
+                    $("#scatterLabel").text("x:" + d.x + '\t' + 'y:' + d.y);
+                });
+            });
+
+        // Put your part five code here ***********************
+        //http://bl.ocks.org/d3noob/raw/5987480/
+		
+        var	margin_set = {top: 30, right: 30, bottom: 30, left: 30},
+        width_set = 480 - margin_set.left - margin_set.right,
+    	height_set = 250 - margin_set.top - margin_set.bottom;
+        
+        // chart 1
+        d3.csv('data/anscombe_I.csv', function(data){
+			//
+		    var x_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+				.range([0, width_set]);
+		    var y_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+				.range([height_set, 0]);
+		    //
+		    var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+		    var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+		    //
+        	
+			
+			// draw the first chart
+			var chart1 = d3.select("#group1")
+        	.append('svg')
+        	.attr('width', width_set + margin_set.left + margin_set.right)
+        	.attr('height', height_set + margin_set.top + margin_set.bottom)
+        	.append('g')
+        	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+			.attr('id', 'scatter1');
+			
+			var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+            chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+                .attr('class', 'main_axis').call(xAxis_scatter);
+
+            var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+            chart1.append('g').attr('transform', 'translate(0,0)')
+                .attr('class', 'main_axis').call(yAxis_scatter);
+        	
+			//compute the linear regression
+			var csvdata = [];
+			data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+			var result = regression('linear', csvdata);
+			var slope = parseFloat(result.equation[0]);
+			var yIntercept = parseFloat(result.equation[1]);
+			
+			var myLine = chart1.append("svg:line")
+            .attr("x1", x_set_scale(0))
+            .attr("y1", y_set_scale(yIntercept))
+            .attr("x2", x_set_scale(16))
+            .attr("y2", y_set_scale((16 * slope) + yIntercept))
+            .style("stroke", "black");
+
+			var g = chart1.append('svg:g');
+            g.selectAll("scatter-dots")
+                .data(data).enter()
+                .append('svg:circle')
+				.attr('class','scatter-points')
+                .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+                .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+                .attr('r', 5)
+				.attr('fill','blue');
+
+			d3.select('#scatter1')
+				.append("text")
+				.attr("x", width_set/2)             
+				.attr("y", 0)
+				.attr("text-anchor", "middle")  
+				.text("Anscombe I")
+				.attr('fill','green');
+		});
+		
+		// chart 2
+        d3.csv('data/anscombe_II.csv', function(data){
+			//
+		    var x_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+				.range([0, width_set]);
+		    var y_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+				.range([height_set, 0]);
+		    //
+		    var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+		    var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+		    //
+        
+			var chart1 = d3.select("#group1")
+        	.append('svg')
+        	.attr('width', width_set + margin_set.left + margin_set.right)
+        	.attr('height', height_set + margin_set.top + margin_set.bottom)
+        	.append('g')
+        	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+			.attr('id', 'scatter2');
+			
+			var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+            chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+                .attr('class', 'main_axis').call(xAxis_scatter);
+
+            var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+            chart1.append('g').attr('transform', 'translate(0,0)')
+                .attr('class', 'main_axis').call(yAxis_scatter);
+        	
+			var g = chart1.append('svg:g');
+            g.selectAll("scatter-dots")
+                .data(data).enter()
+                .append('svg:circle')
+				.attr('class','scatter-points')
+                .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+                .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+                .attr('r', 5)
+				.attr('fill','blue');
+			
+			// Title
+			d3.select('#scatter2')
+				.append("text")
+				.attr("x", width_set/2)             
+				.attr("y", 0)
+				.attr("text-anchor", "middle")  
+				.text("Anscombe II")
+				.attr('fill','green');
+
+			//compute the linear regression
+			var csvdata = [];
+			data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+			var result = regression('linear', csvdata);
+			var slope = parseFloat(result.equation[0]);
+			var yIntercept = parseFloat(result.equation[1]);
+			
+			var myLine = chart1.append("svg:line")
+            .attr("x1", x_set_scale(0))
+            .attr("y1", y_set_scale(yIntercept))
+            .attr("x2", x_set_scale(16))
+            .attr("y2", y_set_scale((16 * slope) + yIntercept))
+            .style("stroke", "black");
+		});
+
+		// chart 3
+        d3.csv('data/anscombe_III.csv', function(data){
+			//
+		    var x_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+				.range([0, width_set]);
+		    var y_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+				.range([height_set, 0]);
+		    //
+		    var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+		    var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+		    //
+        
+			var chart1 = d3.select("#group2")
+        	.append('svg')
+        	.attr('width', width_set + margin_set.left + margin_set.right)
+        	.attr('height', height_set + margin_set.top + margin_set.bottom)
+        	.append('g')
+        	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+			.attr('id', 'scatter3');
+			
+			var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+            chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+                .attr('class', 'main_axis').call(xAxis_scatter);
+
+            var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+            chart1.append('g').attr('transform', 'translate(0,0)')
+                .attr('class', 'main_axis').call(yAxis_scatter);
+        	
+			var g = chart1.append('svg:g');
+            g.selectAll("scatter-dots")
+                .data(data).enter()
+                .append('svg:circle')
+				.attr('class','scatter-points')
+                .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+                .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+                .attr('r', 5)
+				.attr('fill','blue');
+
+			// Title
+			d3.select('#scatter3')
+				.append("text")
+				.attr("x", width_set/2)             
+				.attr("y", 0)
+				.attr("text-anchor", "middle")  
+				.text("Anscombe III")
+				.attr('fill','green');
+			
+			//compute the linear regression
+			var csvdata = [];
+			data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+			var result = regression('linear', csvdata);
+			var slope = parseFloat(result.equation[0]);
+			var yIntercept = parseFloat(result.equation[1]);
+			
+			var myLine = chart1.append("svg:line")
+            .attr("x1", x_set_scale(0))
+            .attr("y1", y_set_scale(yIntercept))
+            .attr("x2", x_set_scale(16))
+            .attr("y2", y_set_scale((16 * slope) + yIntercept))
+            .style("stroke", "black");
+		});
+		
+		// chart 4
+		d3.csv('data/anscombe_IV.csv', function(data){
+			//
+		    var x_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+				.range([0, width_set]);
+		    var y_set_scale = d3.scale.linear()
+				.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+				.range([height_set, 0]);
+		    //
+		    var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+		    var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+		    //
+        
+			var chart1 = d3.select("#group2")
+        	.append('svg')
+        	.attr('width', width_set + margin_set.left + margin_set.right)
+        	.attr('height', height_set + margin_set.top + margin_set.bottom)
+        	.append('g')
+        	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+			.attr('id', 'scatter4');
+			
+			var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+            chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+                .attr('class', 'main_axis').call(xAxis_scatter);
+
+            var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+            chart1.append('g').attr('transform', 'translate(0,0)')
+                .attr('class', 'main_axis').call(yAxis_scatter);
+        	
+			var g = chart1.append('svg:g');
+            g.selectAll("scatter-dots")
+                .data(data).enter()
+                .append('svg:circle')
+				.attr('class','scatter-points')
+                .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+                .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+                .attr('r', 5)
+				.attr('fill','blue');
+
+			// Title
+			d3.select('#scatter4')
+				.append("text")
+				.attr("x", width_set/2)             
+				.attr("y", 0)
+				.attr("text-anchor", "middle")  
+				.text("Anscombe IV")
+				.attr('fill','green');
+
+			//compute the linear regression
+			var csvdata = [];
+			data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+			var result = regression('linear', csvdata);
+			var slope = parseFloat(result.equation[0]);
+			var yIntercept = parseFloat(result.equation[1]);
+			
+			var myLine = chart1.append("svg:line")
+            .attr("x1", x_set_scale(0))
+            .attr("y1", y_set_scale(yIntercept))
+            .attr("x2", x_set_scale(20))
+            .attr("y2", y_set_scale((16 * slope) + yIntercept))
+            .style("stroke", "black");
+		});
+
+		// Put Whistle: Transitions code here ***********************
+		var	margin_set = {top: 30, right: 30, bottom: 30, left: 30},
+        width_set = 480 - margin_set.left - margin_set.right,
+    	height_set = 250 - margin_set.top - margin_set.bottom;
+		
+		var x_set_scale = d3.scale.linear().range([0, width_set]);
+		var y_set_scale = d3.scale.linear().range([height_set, 0]);
+		var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+		var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+
+        d3.csv('data/anscombe_I.csv', function(data){
+			x_set_scale.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2]);
+			y_set_scale.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2]);
+
+			// draw the first chart
+			var chart1 = d3.select("#Part_Transitions")
+	    	.append('svg')
+	    	.attr('width', width_set + margin_set.left + margin_set.right)
+	    	.attr('height', height_set + margin_set.top + margin_set.bottom)
+	    	.append('g')
+	    	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+			.attr('id', 'scatter1');
+		
+			var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+	        chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+	            .attr('class', 'main_axis').call(xAxis_scatter);
+
+	        var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+	        chart1.append('g').attr('transform', 'translate(0,0)')
+	            .attr('class', 'main_axis').call(yAxis_scatter);
+	    	
+			//compute the linear regression
+			var csvdata = [];
+			data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+			var result = regression('linear', csvdata);
+			var slope = parseFloat(result.equation[0]);
+			var yIntercept = parseFloat(result.equation[1]);
+		
+			var myLine = chart1.append("svg:line")
+	        .attr("x1", x_set_scale(0))
+	        .attr("y1", y_set_scale(yIntercept))
+	        .attr("x2", x_set_scale(16))
+	        .attr("y2", y_set_scale((16 * slope) + yIntercept))
+	        .style("stroke", "black");
+
+			var g = chart1.append('svg:g');
+	        g.selectAll("scatter-dots")
+	            .data(data).enter()
+	            .append('svg:circle')
+				.attr('class','scatter-points')
+	            .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+	            .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+	            .attr('r', 5)
+				.attr('fill','blue');
+
+			d3.select('#scatter1')
+				.append("text")
+				.attr("x", width_set/2)             
+				.attr("y", 0)
+				.attr("text-anchor", "middle")  
+				.text("Anscombe I")
+				.attr('fill','green');
+		});
+
+        // chart 1
+		function updateData1(){
+		    d3.csv('data/anscombe_I.csv', function(data){
+				x_set_scale.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2]);
+				y_set_scale.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2]);
+				
+				// draw the first chart
+				var chart1 = d3.select("#Part_Transitions").transition();
+			
+				var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+		        chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+		            .attr('class', 'main_axis').call(xAxis_scatter);
+
+		        var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+		        chart1.append('g').attr('transform', 'translate(0,0)')
+		            .attr('class', 'main_axis').call(yAxis_scatter);
+		    	
+				//compute the linear regression
+				var csvdata = [];
+				data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+				var result = regression('linear', csvdata);
+				var slope = parseFloat(result.equation[0]);
+				var yIntercept = parseFloat(result.equation[1]);
+			
+				var myLine = chart1.append("svg:line")
+		        .attr("x1", x_set_scale(0))
+		        .attr("y1", y_set_scale(yIntercept))
+		        .attr("x2", x_set_scale(16))
+		        .attr("y2", y_set_scale((16 * slope) + yIntercept))
+		        .style("stroke", "black");
+
+				var g = chart1.append('svg:g');
+		        g.selectAll("scatter-dots")
+		            .data(data).enter()
+		            .append('svg:circle')
+					.attr('class','scatter-points')
+		            .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+		            .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+		            .attr('r', 5)
+					.attr('fill','blue');
+
+				d3.select('#scatter1')
+					.append("text")
+					.attr("x", width_set/2)             
+					.attr("y", 0)
+					.attr("text-anchor", "middle")  
+					.text("Anscombe I")
+					.attr('fill','green');
+			});
+		}
+		// chart 2
+		function updateData2(){
+		    d3.csv('data/anscombe_II.csv', function(data){
+				//
+				var x_set_scale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+					.range([0, width_set]);
+				var y_set_scale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+					.range([height_set, 0]);
+				//
+				var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+				var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+				//
+		    
+				var chart1 = d3.select("#Part_Transitions").transition();
+			
+				var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+		        chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+		            .attr('class', 'main_axis').call(xAxis_scatter);
+
+		        var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+		        chart1.append('g').attr('transform', 'translate(0,0)')
+		            .attr('class', 'main_axis').call(yAxis_scatter);
+		    	
+				var g = chart1.append('svg:g');
+		        g.selectAll("scatter-dots")
+		            .data(data).enter()
+		            .append('svg:circle')
+					.attr('class','scatter-points')
+		            .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+		            .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+		            .attr('r', 5)
+					.attr('fill','blue');
+			
+				// Title
+				d3.select('#scatter2')
+					.append("text")
+					.attr("x", width_set/2)             
+					.attr("y", 0)
+					.attr("text-anchor", "middle")  
+					.text("Anscombe II")
+					.attr('fill','green');
+			});
+		}
+
+		// chart 3
+		function updateData3(){
+		    d3.csv('data/anscombe_III.csv', function(data){
+				//
+				var x_set_scale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+					.range([0, width_set]);
+				var y_set_scale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+					.range([height_set, 0]);
+				//
+				var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+				var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+				//
+		    
+				var chart1 = d3.select("#Part_Transitions")
+		    	.append('svg')
+		    	.attr('width', width_set + margin_set.left + margin_set.right)
+		    	.attr('height', height_set + margin_set.top + margin_set.bottom)
+		    	.append('g')
+		    	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+				.attr('id', 'scatter3');
+			
+				var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+		        chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+		            .attr('class', 'main_axis').call(xAxis_scatter);
+
+		        var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+		        chart1.append('g').attr('transform', 'translate(0,0)')
+		            .attr('class', 'main_axis').call(yAxis_scatter);
+		    	
+				var g = chart1.append('svg:g');
+		        g.selectAll("scatter-dots")
+		            .data(data).enter()
+		            .append('svg:circle')
+					.attr('class','scatter-points')
+		            .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+		            .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+		            .attr('r', 5)
+					.attr('fill','blue');
+
+				// Title
+				d3.select('#scatter3')
+					.append("text")
+					.attr("x", width_set/2)             
+					.attr("y", 0)
+					.attr("text-anchor", "middle")  
+					.text("Anscombe III")
+					.attr('fill','green');
+			
+				//compute the linear regression
+				var csvdata = [];
+				data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+				var result = regression('linear', csvdata);
+				var slope = parseFloat(result.equation[0]);
+				var yIntercept = parseFloat(result.equation[1]);
+			
+				var myLine = chart1.append("svg:line")
+		        .attr("x1", x_set_scale(0))
+		        .attr("y1", y_set_scale(yIntercept))
+		        .attr("x2", x_set_scale(16))
+		        .attr("y2", y_set_scale((16 * slope) + yIntercept))
+		        .style("stroke", "black");
+			});
+		}
+		// chart 4
+		function updateData4(){
+			d3.csv('data/anscombe_IV.csv', function(data){
+				//
+				var x_set_scale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d){return parseFloat(d['x']);}) + 2])
+					.range([0, width_set]);
+				var y_set_scale = d3.scale.linear()
+					.domain([0, d3.max(data, function(d){return parseFloat(d['y']);}) + 2])
+					.range([height_set, 0]);
+				//
+				var xAxis_set = d3.svg.axis().scale(x_set_scale).orient("bottom").ticks(5);
+				var yAxis_set = d3.svg.axis().scale(y_set_scale).orient('left').ticks(5);
+				//
+		    
+				var chart1 = d3.select("#Part_Transitions")
+		    	.append('svg')
+		    	.attr('width', width_set + margin_set.left + margin_set.right)
+		    	.attr('height', height_set + margin_set.top + margin_set.bottom)
+		    	.append('g')
+		    	.attr('transform', 'translate(' + margin_set.left + ',' + margin_set.top + ')')
+				.attr('id', 'scatter4');
+			
+				var xAxis_scatter = d3.svg.axis().scale(x_set_scale).orient('bottom');
+		        chart1.append('g').attr('transform', 'translate(0,' + height_set + ')')
+		            .attr('class', 'main_axis').call(xAxis_scatter);
+
+		        var yAxis_scatter = d3.svg.axis().scale(y_set_scale).orient('left');
+		        chart1.append('g').attr('transform', 'translate(0,0)')
+		            .attr('class', 'main_axis').call(yAxis_scatter);
+		    	
+				var g = chart1.append('svg:g');
+		        g.selectAll("scatter-dots")
+		            .data(data).enter()
+		            .append('svg:circle')
+					.attr('class','scatter-points')
+		            .attr('cx', function(d){return x_set_scale(parseFloat(d.x) );})
+		            .attr('cy', function(d){return y_set_scale(parseFloat(d.y));})
+		            .attr('r', 5)
+					.attr('fill','blue');
+
+				// Title
+				d3.select('#scatter4')
+					.append("text")
+					.attr("x", width_set/2)             
+					.attr("y", 0)
+					.attr("text-anchor", "middle")  
+					.text("Anscombe IV")
+					.attr('fill','green');
+
+				//compute the linear regression
+				var csvdata = [];
+				data.map(function(d){csvdata.push([parseFloat(d.x), parseFloat(d.y)])});
+				var result = regression('linear', csvdata);
+				var slope = parseFloat(result.equation[0]);
+				var yIntercept = parseFloat(result.equation[1]);
+			
+				var myLine = chart1.append("svg:line")
+		        .attr("x1", x_set_scale(0))
+		        .attr("y1", y_set_scale(yIntercept))
+		        .attr("x2", x_set_scale(20))
+		        .attr("y2", y_set_scale((16 * slope) + yIntercept))
+		        .style("stroke", "black");
+			});
+		}
+    </script>
+</body>
+</html>

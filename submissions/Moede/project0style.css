@@ -1,0 +1,33 @@
+html{
+    background-color: grey;
+}
+body {
+    font-family: sans-serif;
+    font-size: 11px;
+    font: blue;
+    padding-left: 50px;
+    background-color: bluel;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.point {
+    fill: #f00; 
+    stroke: #000;
+}
+
+.label {
+    text-anchor: middle;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#partFive{
+    display: inline;
+}

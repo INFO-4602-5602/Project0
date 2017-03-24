@@ -1,0 +1,524 @@
+<html>
+<head>
+<title>Project 0</title>
+<style type="text/css" href="project0.css">
+    .axis {
+      font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .dot {
+      stroke: #000;
+    }
+
+    .container{
+        float:left;
+        margin-bottom: 100px;
+        margin-left: 50px;
+    }
+
+    .line {
+        stroke: #E4002B;
+        fill: none;
+        stroke-width: 3;
+    }
+
+    .tooltip {
+      position: absolute;
+      width: 200px;
+      height: 28px;
+      pointer-events: none;
+    }
+
+    .container2{
+        float:left;
+        margin-left: 50px;
+    }
+
+    .scatter1{
+        float:left;
+        margin-left: 50px;
+    }
+
+    #inds{
+        top:10px;
+        left:10px;
+    }
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<!--Put your D3 import statement between these two lines-->
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <!-- <script src="https://d3js.org/d3.v3.min.js"></script> -->
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+    
+    <div id="partTwo" style="display: inline-block;">
+        <h1>Part Two: </h1>
+        <div class="container2", id="barchart1"></div>
+        <div class="container2", id="barchart2"></div>
+	</div>
+    
+    <div id="partThree" style="display: inline-block;">
+        <h1>Part Three &amp; Four: </h1>
+        <div class="scatter1" id="scatterplot">
+            <select id="inds">
+                <option value="I", selected="selected">Anscombe_I</option>
+                <option value="II">Anscombe_II</option>
+                <option value="III">Anscombe III</option>
+                <option value="IV">Anscombe_IV</option>
+            </select>
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div class="container", id="chart1"></div>
+        <div class="container", id="chart2"></div>
+        <div class="container", id="chart3"></div>
+        <div class="container", id="chart4"></div>
+	</div>
+    
+    <script type="text/javascript">
+
+        var files = ["data/anscombe_I.csv", "data/anscombe_II.csv", "data/anscombe_III.csv", "data/anscombe_IV.csv"];
+        var div_ids = ["#chart1", "#chart2", "#chart3", "#chart4"];
+        var filetext = ["Anscombe I", "Anscombe II", "Anscombe III", "Anscombe IV"];
+
+
+        // Put your part one code here ***********************
+        files.forEach(function(d, i){
+            d3.csv(d, function(data){
+                checkDataset(data);
+            })
+        });
+        
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+        
+        // Put your part two code here ***********************
+        var margin = {top:20, right:20, bottom:50, left:40};
+        var width = 400;
+        var height = 300;
+
+        var x = d3.scale.ordinal().rangeRoundBands([0, width], .2);
+        var y = d3.scale.linear().range([height, 0]);
+
+        d3.csv("data/anscombe_I.csv", function(csvData){
+
+            var data = csvData;
+
+            data.forEach(function(d){
+                d.x = +d.x;
+                d.y = +d.y;
+            })
+
+            var svg = d3.select("#barchart1")
+                .append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
+
+            var g = svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                
+            x.domain(data.map(function(d, i) { return i + 1; }));
+            y.domain([0, d3.max(data, function(d) { return d.x; })]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var xAxisG = g.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(0, ' + height + ')')
+                    .call(xAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("x", (width / 2) + 20)
+                    .attr("y", 35)
+                    .style("text-anchor", "end")                    
+                    .style("font-size", "15px")
+                    .text("Indices");
+
+            var yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+
+            var yAxisG = g.append('g')
+                    .attr('class', 'y axis')
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 0 - margin.left)
+                    .attr("x",0 - (height / 2))
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "15px")
+                    .text("Values of X")
+
+            g.selectAll(".bar")
+             .data(data)
+             .enter().append("rect")
+             .style("fill", "steelblue")
+             .attr("class", "bar")
+             .attr("x", function(d, i) { return x(i + 1); })
+             .attr("y", function(d)    { return y(d.x); })
+             .attr("width", x.rangeBand())
+             .attr("height", function(d) { return height - y(d.x); });
+
+        });
+
+        d3.csv("data/anscombe_I.csv", function(csvData){
+
+            var data = csvData;
+
+            data.forEach(function(d){
+                d.x = +d.x;
+                d.y = +d.y;
+            })
+
+            var svg = d3.select("#barchart2")
+                .append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
+
+            var g = svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                
+            x.domain(data.map(function(d, i) { return i + 1; }));
+            y.domain([0, d3.max(data, function(d) { return d.y; })]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var xAxisG = g.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(0, ' + height + ')')
+                    .call(xAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("x", (width / 2) + 20)
+                    .attr("y", 35)
+                    .style("text-anchor", "end")                    
+                    .style("font-size", "15px")
+                    .text("Indices");
+
+            var yAxis = d3.svg.axis()
+                      .scale(y)
+                      .orient("left");
+
+            var yAxisG = g.append('g')
+                    .attr('class', 'y axis')
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 0 - margin.left)
+                    .attr("x",0 - (height / 2))
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "15px")
+                    .text("Values of Y");
+
+            g.selectAll(".bar")
+             .data(data)
+             .enter().append("rect")
+             .style("fill", "steelblue")
+             .attr("class", "bar")
+             .attr("x", function(d, i) { return x(i + 1); })
+             .attr("y", function(d)    { return y(d.y); })
+             .attr("width", x.rangeBand())
+             .attr("height", function(d) { return height - y(d.y); });
+
+        });
+        
+        // Put your part three & four code here ***********************
+
+        function changeGraph(){
+            var sect = document.getElementById("inds");
+            var p3 = document.getElementById('partThree');
+            var svgTag = p3.querySelector('svg');
+            if(svgTag) {
+                svgTag.remove();
+            }
+            var section = sect.options[sect.selectedIndex].value;
+
+            d3.csv("data/anscombe_" + section + ".csv", function(csvData){
+
+                var data = csvData;
+
+                data.forEach(function(d){
+                    d.x = +d.x;
+                    d.y = +d.y;
+                })
+
+                var x = d3.scale.linear().range([0, width]);
+                var y = d3.scale.linear().range([height, 0]);
+
+                var color = d3.scale.category10();
+
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
+
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
+
+                var svg = d3.select("#scatterplot").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                   .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var tooltip = d3.select("body").append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 0);
+
+                x.domain([0, d3.max(data, function(d) { return d.x; })]);
+                y.domain([0, d3.max(data, function(d) { return d.y; })]);
+
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                   .append("text")
+                    .attr("class", "label")
+                    .attr("x", (width / 2) + 20)
+                    .attr("y", 35)
+                    .style("text-anchor", "end")                    
+                    .style("font-size", "15px")
+                    .text("Values of X");
+
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                   .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 0 - margin.left)
+                    .attr("x",0 - (height / 2))
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "15px")
+                    .text("Values of Y");
+
+                // http://bl.ocks.org/weiglemc/6185069
+                svg.selectAll(".dot")
+                    .data(data)
+                   .enter().append("circle")
+                    .attr("class", "dot")
+                    .attr("r", 3.5)
+                    .attr("cx", function(d) { return x(d.x); })
+                    .attr("cy", function(d) { return y(d.y); })
+                    .on('click', function(d) { 
+                        document.getElementById("scatterLabel").innerHTML = "x = "+d.x+", y = "+d.y+""})
+                    .style("fill", "red")
+                    .on("mouseover", function(d){
+                        tooltip.transition()
+                                .duration(200)
+                                .style("opacity", .9);
+                        tooltip.html("(" + d.x + ", " + d.y + ")")
+                                .style("left", (d3.event.pageX ) + "px")
+                                .style("top", (d3.event.pageY - 30) + "px");
+                        d3.select(this).style("fill", "blue");
+                    })
+                    .on("mouseout", function(d){
+                        tooltip.transition()
+                                .duration(500)
+                                .style("opacity", 0);
+                        d3.select(this).style("fill", "red");
+                    })
+
+            })
+                
+        }      
+
+        d3.select('#inds')
+            .on("change", changeGraph);        
+        
+        // Put your part five code here ***********************
+        for(i=0; i < files.length; i++){
+            createScatterSet(files[i], div_ids[i], filetext[i]);
+        }        
+
+        function createScatterSet(path, divId, filename){
+            d3.csv(path, function(csvData){
+                var margin = {top:30, right:20, bottom:50, left:40};
+                var width = 400;
+                var height = 300;
+
+                csvData.forEach(function(d){
+                    d.x = +d.x;
+                    d.y = +d.y;
+                })
+
+                var data = create_data(csvData);
+
+                data.forEach(function(d){
+                    d.x = +d.x;
+                    d.y = +d.y;
+                    d.yhat = +d.yhat;
+                })
+
+                var x = d3.scale.linear().range([0, width]);
+                var y = d3.scale.linear().range([height, 0]);
+
+                // var color = d3.scale.category10();
+
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
+
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left")
+                    .ticks(data.length / 2);
+
+                var svg = d3.select(divId).append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                   .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                x.domain([0, d3.max(data, function(d) { return d.x; })]).nice();
+                y.domain([0, d3.max(data, function(d) { return d.y; })]).nice();
+
+                var line = d3.svg.line()
+                    .x(function(d) { 
+                        return x(d.x);
+                    })
+                    .y(function(d) {
+                        return y(d.yhat);
+                    });
+
+                svg.append("path")
+                    .datum(data)
+                    .attr("class", "line")
+                    .attr("d", line);
+
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                   .append("text")
+                    .attr("class", "label")
+                    .attr("x", (width / 2) + 20)
+                    .attr("y", 35)
+                    .style("text-anchor", "end")                    
+                    .style("font-size", "15px")
+                    .text("Values of X");
+
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                   .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 0 - margin.left)
+                    .attr("x",0 - (height / 2))
+                    .attr("dy", "1em")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "15px")
+                    .text("Values of Y");
+
+                svg.selectAll(".dot")
+                    .data(data)
+                   .enter().append("circle")
+                    .attr("class", "dot")
+                    .attr("r", 3.5)
+                    .attr("cx", function(d) { return x(d.x); })
+                    .attr("cy", function(d) { return y(d.y); })
+
+                // http://www.d3noob.org/2013/01/adding-title-to-your-d3js-graph.html
+
+                svg.append("text")
+                    .attr("x", (width / 2))             
+                    .attr("y", 0 - (margin.top / 2))
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "20px") 
+                    .style("text-decoration", "underline")  
+                    .text(filename);
+
+            })
+        }
+
+        // Referred from https://bl.ocks.org/ctufts/298bfe4b11989960eeeecc9394e9f118
+        function create_data(csvData) {
+
+            var n = csvData.length;
+            var x_mean = 0;
+            var y_mean = 0;
+            var term1 = 0;
+            var term2 = 0;
+
+            // create x and y values
+            for (var i = 0; i < n; i++) {
+                x_mean += csvData[i].x
+                y_mean += csvData[i].y
+
+            }
+
+            // calculate mean x and y
+            x_mean /= n;
+            // console.log("Mean of x: " + x_mean);
+            y_mean /= n;
+
+            // calculate coefficients
+            var xr = 0;
+            var yr = 0;
+            for (i = 0; i < n; i++) {
+                xr = csvData[i].x - x_mean;
+                yr = csvData[i].y - y_mean;
+                term1 += xr * yr;
+                term2 += xr * xr;
+
+            }
+
+            var b1 = term1 / term2;
+            var b0 = y_mean - (b1 * x_mean);
+
+            // perform regression
+            yhat = [];
+            // fit line using coeffs
+            for (i = 0; i < n; i++) {
+                // console.log("Yhat val: " + csvData[i].x);
+                yhat.push(b0 + (csvData[i].x * b1));
+            }
+            // console.log("Yhat " + yhat);
+
+            var data = [];
+            for (i = 0; i < n; i++) {
+                data.push({
+                    "yhat": yhat[i],
+                    "y": csvData[i].y,
+                    "x": csvData[i].x
+                })
+            }
+            return (data);
+        }
+
+        changeGraph();
+    </script>
+</body>
+
+
+</html>
+
+
+

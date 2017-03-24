@@ -1,0 +1,1 @@
+I worked with Chase and Kyle on this project. They both really helped me go through each line of code and explain why we were putting what we were putting. The fifth part of the project non of us could figure out. I did the best I could on this, and luckily I had awesome people to help me out and teach me some of this stuff I've never even heard of before. 

@@ -1,0 +1,44 @@
+body {
+    font-family: "Bookman Old Style";
+    font-size: 11px;
+    #background-color: #dcaf5c;
+}
+
+svg{
+    background-image: url("./images/PT.jpg");
+    -webkit-background-size: cover;
+    border-radius: 20px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.point {
+    fill: #f00;
+    stroke: #000;
+}
+#scatterplotSet {
+    width: 1500px;
+    height: 700px;
+}
+
+.cell{
+    outline: 1px solid black;
+    float: left;
+    height: 500px;
+    width: 700px;
+}
+.label {
+    text-anchor: middle;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.tooltip {
+    position: absolute;
+}

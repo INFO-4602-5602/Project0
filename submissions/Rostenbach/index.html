@@ -1,0 +1,432 @@
+<html>
+<head>
+<title>Project 0</title>
+<style type="text/css" href="project0.css"></style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="d3/d3/.v3.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+    
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+    
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+	</div>
+    
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+        
+        // Uploading data from anscombe_I.csv
+		d3.csv("/data/anscombe_I.csv", function(data) {
+			var dataOne = data;
+			// checking if it uploaded correctly
+			checkDataset(dataOne);
+		});
+		
+		// Uploading data from anscombe_I.csv
+		d3.csv("/data/anscombe_II.csv", function(data2) {
+			var dataTwo = data2;
+			// checking if it uploaded correctly
+			checkDataset(dataTwo);
+		});
+		
+		// Uploading data from anscombe_I.csv
+		d3.csv("/data/anscombe_III.csv", function(data3) {
+			var dataThree = data3;
+			//checking if it uploaded correctly
+			checkDataset(dataThree);
+		});
+		
+		// Uploading data from anscombe_I.csv
+		d3.csv("/data/anscombe_IV.csv", function(data4) {
+			var dataFour = data4;
+			//checking if it uploaded correctly
+			checkDataset(dataFour);
+		});
+        
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+/* ############################################################################################################################# */
+        // Put your part two code here ***********************
+        
+        // Building a bar graph of only column 1, 'x' values, in the anscombe_I csv file. 
+        // Disregarding column 2, or the 'y' values.
+        
+        // the seperate array used to house all the 'x' values.
+        var dataBarX = [];
+        // variable i to help put the 'x' values into the above array.
+        var i = 0;
+        	
+		d3.csv("/data/anscombe_I.csv", function(data) {
+			// For each number it makes the x value an int and not a string. thats "d.x = +d.x". It tells it to handle it a number
+			// Since we are only using the 'x' values in I put seperated them and put them into their own array -> dataBarX.
+			// Didn't know how to iterate through and put them in so handled it as if data.forEach was a for loop and iterated it over
+			// a var i. 
+			
+			data.forEach(function(d) {
+				d.x = +d.x;
+				dataBarX[i] = d.x;
+				i = i+1;
+			});
+			
+			// width and height 
+			var width = d3.selectAll(dataBarX).size();
+			var height = d3.max(dataBarX);
+				
+			// svg to show the data. 
+			// width is the number of elements * 40, 40 being the width of the bars themselves
+			// height is just the maximum value of the bars
+			var svg = d3.select("#partTwo")
+				.append("svg")
+				.attr("width", width * 40)
+				.attr("height", height);
+				
+			// putting all the data into it now, data from array dataBarX
+			svg.selectAll('bar')
+					.data(dataBarX)
+					.enter()
+					.append('rect')
+						// making them red with a width of 40
+						.style("fill", "red")
+						.attr("width", 40)
+						.attr("height", function(d) {
+							return d;
+						})
+						// returns this so there is a 10 pixel spacing between the bars. 50 = width + 10 where width = 40
+						.attr("x", function(d, i) {
+							return i * 50;
+						})
+						.attr("y", function(d) {
+							return height - d;
+						})
+		});
+		
+/* ################################################################################################################################## */			
+        // Put your part three & four code here ***********************			
+       
+       d3.csv("/data/anscombe_I.csv", function(data) {
+			// setting width and height
+			var width = 500;
+			var height = 500;
+			
+			// getting the values. changes them to numberical form as well instead of string
+			var xValues = function(d) {
+				return +d.x;
+			};
+			var yValues = function(d) {
+				return +d.y;
+			};
+			
+			// the scales
+			xScale = d3.scale.linear().range([0, width]);
+			yScale = d3.scale.linear().range([height, 0]);
+			
+			// mapping
+			xMap = function(d) { 
+				return xScale(xValues(d));
+			};
+			yMap = function(d) { 
+				return yScale(yValues(d));
+			};
+			
+			// axis set up
+			xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+			yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			// buffers to stop overlapping
+			// sets the domain of the x and scales to one below and one above so there is atleast a spacing of 1
+			// between the data closest to the axes and the axe itself.
+			xScale.domain([d3.min(data, xValues)-1, d3.max(data, xValues)+1]);
+			yScale.domain([d3.min(data, yValues)-1, d3.max(data, yValues)+1]);
+			
+			// putting it in the Part Three and Four section
+			var svg = d3.select("#partThree")
+				.append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+			// gets all the data and forms it on the graph as a circle with radius (r) 10
+			svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", xMap)
+					.attr("cy", yMap)
+					.attr("r", 10)
+					.style("fill", "red");
+		});
+		
+/* ###################################################################################################################### */
+        // Put your part five code here ***********************
+        // Just the above part 4 times?
+        
+        d3.csv("/data/anscombe_I.csv", function(data) {
+			// setting width and height
+			var width = 500;
+			var height = 500;
+			
+			// getting the values. changes them to numberical form as well instead of string
+			var xValues = function(d) {
+				return +d.x;
+			};
+			var yValues = function(d) {
+				return +d.y;
+			};
+			
+			// the scales
+			xScale = d3.scale.linear().range([0, width]);
+			yScale = d3.scale.linear().range([height, 0]);
+			
+			// mapping
+			xMap = function(d) { 
+				return xScale(xValues(d));
+			};
+			yMap = function(d) { 
+				return yScale(yValues(d));
+			};
+			
+			// axis set up
+			xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+			yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			// buffers to stop overlapping
+			// sets the domain of the x and scales to one below and one above so there is atleast a spacing of 1
+			// between the data closest to the axes and the axe itself.
+			xScale.domain([d3.min(data, xValues)-1, d3.max(data, xValues)+1]);
+			yScale.domain([d3.min(data, yValues)-1, d3.max(data, yValues)+1]);
+			
+			// putting it in the Part Three and Four section
+			var svg = d3.select("#partFive")
+				.append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+			// gets all the data and forms it on the graph as a circle with radius (r) 10
+			svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", xMap)
+					.attr("cy", yMap)
+					.attr("r", 10)
+					.style("fill", "red");
+		});
+   
+        d3.csv("/data/anscombe_II.csv", function(data) {
+			// setting width and height
+			var width = 500;
+			var height = 500;
+			
+			// getting the values. changes them to numberical form as well instead of string
+			var xValues = function(d) {
+				return +d.x;
+			};
+			var yValues = function(d) {
+				return +d.y;
+			};
+			
+			// the scales
+			xScale = d3.scale.linear().range([0, width]);
+			yScale = d3.scale.linear().range([height, 0]);
+			
+			// mapping
+			xMap = function(d) { 
+				return xScale(xValues(d));
+			};
+			yMap = function(d) { 
+				return yScale(yValues(d));
+			};
+			
+			// axis set up
+			xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+			yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			// buffers to stop overlapping
+			// sets the domain of the x and scales to one below and one above so there is atleast a spacing of 1
+			// between the data closest to the axes and the axe itself.
+			xScale.domain([d3.min(data, xValues)-1, d3.max(data, xValues)+1]);
+			yScale.domain([d3.min(data, yValues)-1, d3.max(data, yValues)+1]);
+			
+			// putting it in the Part Three and Four section
+			var svg = d3.select("#partFive")
+				.append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+			// gets all the data and forms it on the graph as a circle with radius (r) 10
+			svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", xMap)
+					.attr("cy", yMap)
+					.attr("r", 10)
+					.style("fill", "red");
+		});
+		
+		
+		        
+        d3.csv("/data/anscombe_III.csv", function(data) {
+			// setting width and height
+			var width = 500;
+			var height = 500;
+			
+			// getting the values. changes them to numberical form as well instead of string
+			var xValues = function(d) {
+				return +d.x;
+			};
+			var yValues = function(d) {
+				return +d.y;
+			};
+			
+			// the scales
+			xScale = d3.scale.linear().range([0, width]);
+			yScale = d3.scale.linear().range([height, 0]);
+			
+			// mapping
+			xMap = function(d) { 
+				return xScale(xValues(d));
+			};
+			yMap = function(d) { 
+				return yScale(yValues(d));
+			};
+			
+			// axis set up
+			xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+			yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			// buffers to stop overlapping
+			// sets the domain of the x and scales to one below and one above so there is atleast a spacing of 1
+			// between the data closest to the axes and the axe itself.
+			xScale.domain([d3.min(data, xValues)-1, d3.max(data, xValues)+1]);
+			yScale.domain([d3.min(data, yValues)-1, d3.max(data, yValues)+1]);
+			
+			// putting it in the Part Three and Four section
+			var svg = d3.select("#partFive")
+				.append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+			// gets all the data and forms it on the graph as a circle with radius (r) 10
+			svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", xMap)
+					.attr("cy", yMap)
+					.attr("r", 10)
+					.style("fill", "red");
+		});
+			        
+        d3.csv("/data/anscombe_IV.csv", function(data) {
+			// setting width and height
+			var width = 500;
+			var height = 500;
+			
+			// getting the values. changes them to numberical form as well instead of string
+			var xValues = function(d) {
+				return +d.x;
+			};
+			var yValues = function(d) {
+				return +d.y;
+			};
+			
+			// the scales
+			xScale = d3.scale.linear().range([0, width]);
+			yScale = d3.scale.linear().range([height, 0]);
+			
+			// mapping
+			xMap = function(d) { 
+				return xScale(xValues(d));
+			};
+			yMap = function(d) { 
+				return yScale(yValues(d));
+			};
+			
+			// axis set up
+			xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom")
+				.ticks(5);
+			yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient("left")
+				.ticks(5);
+			
+			// buffers to stop overlapping
+			// sets the domain of the x and scales to one below and one above so there is atleast a spacing of 1
+			// between the data closest to the axes and the axe itself.
+			xScale.domain([d3.min(data, xValues)-1, d3.max(data, xValues)+1]);
+			yScale.domain([d3.min(data, yValues)-1, d3.max(data, yValues)+1]);
+			
+			// putting it in the Part Three and Four section
+			var svg = d3.select("#partFive")
+				.append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+			// gets all the data and forms it on the graph as a circle with radius (r) 10
+			svg.selectAll("circle")
+					.data(data)
+					.enter()
+					.append("circle")
+					.attr("cx", xMap)
+					.attr("cy", yMap)
+					.attr("r", 10)
+					.style("fill", "red");
+		});
+        
+    </script>
+</body>
+
+
+</html>

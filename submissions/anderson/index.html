@@ -1,0 +1,102 @@
+<html>
+<head>
+<title>Project 0</title>
+<link rel="stylesheet" href="project0.css"></link>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+
+  <section>
+  	<div id="partOne">
+      <h1>Part One: </h1>
+  	</div>
+
+    <div id="partTwo" class="inline">
+      <h1>Part Two: </h1>
+      <div id="barchart">
+      </div>
+  	</div>
+
+    <div id="partThree" class="inline">
+      <h1>Part Three &amp; Four: <select id="chooser">
+          <option value=0>Anscombe I</option>
+          <option value=1>Anscombe II</option>
+          <option value=2>Anscombe III</option>
+          <option value=3>Anscombe IV</option>
+        </select>
+      </h1>
+      <div id="scatterplot">
+        <p id="scatterLabel">Click on a Point</p>
+      </div>
+  	</div>
+
+    <div id="partFive">
+      <h1>Part Five: </h1>
+      <div id="scatterplotSet">
+        <svg id="sm_1" class="sm"></svg>
+        <svg id="sm_2" class="sm"></svg>
+        <svg id="sm_3" class="sm"></svg>
+        <svg id="sm_4" class="sm"></svg>
+      </div>
+    </div>
+  </section>
+
+  <script type="text/javascript">
+    var datasets = [
+      {'path': 'data/anscombe_i.csv',
+       'title': "Anscombe I"},
+      {'path': 'data/anscombe_ii.csv',
+       'title': "Anscombe II"},
+      {'path': 'data/anscombe_iii.csv',
+       'title': "Anscombe III"},
+      {'path': 'data/anscombe_iv.csv',
+       'title': "Anscombe IV"}
+    ]
+
+    // Put your part one code here ***********************
+    datasets.forEach(function(item, idx){
+      d3.csv(item.path, function(data){
+        checkDataset(data, item.path)
+      })
+    })
+
+    // Leave this to test your data uploading. All data uploading should be above this line
+    function checkDataset(dataset, fileName) {
+      if (dataset.length == 11)
+        $("#partOne").append("<p>"+fileName+": data loaded correctly</p>");
+      else
+        $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+    }
+
+    d_idx = Math.floor((Math.random() * 4));
+    console.log("Loading dataset: " + datasets[d_idx].path)
+
+    document.getElementById("chooser").value = d_idx
+
+    // Put your part two code here ***********************
+    /* Moving code to js/ directory for organizational purposes. */
+    </script>
+
+    <script src="js/part2.js"></script>
+    <script src="js/parts3_and_4.js"></script>
+    <script src="js/part5.js"></script>
+
+    <script>
+    // Call part II
+    partTwo(d_idx)
+
+    // Call part III & IV
+    partThree(d_idx)
+
+    // Call Part V
+    partFive()
+
+  </script>
+</body>
+
+
+</html>

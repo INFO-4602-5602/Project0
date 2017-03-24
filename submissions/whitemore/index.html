@@ -1,0 +1,536 @@
+<html>
+<head>
+<!--https://community.apachefriends.org/f/viewtopic.php?p=109331-->
+<link href="project0.css" rel="stylesheet" type="text/css" /> 
+<title>Project 0</title>
+<style type="text/css" href="project0.css"></style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Project 0 : Matilda Whitemore<br />Part One: </h1>
+	</div>
+    
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+    
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+	</div>
+    
+    <script type="text/javascript">
+        
+        // Put your part one code here ***********************
+        d3.csv('anscombe_I.csv', function(csvData){
+            return checkDataset(csvData); // load each dataset and check that they are read in correctly
+        })
+        d3.csv('anscombe_II.csv', function(csvData){
+            return checkDataset(csvData);
+        })  
+        d3.csv('anscombe_III.csv', function(csvData){
+            return checkDataset(csvData);
+        })  
+        d3.csv('anscombe_IV.csv', function(csvData){
+            return checkDataset(csvData);
+        })  
+    
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+        
+        // Put your part two code here ***********************
+        d3.csv('anscombe_I.csv', function(csvData){
+            var data = csvData;
+            // read in file and set variables (based on in class example)
+            var xVal = 'x';
+            var yVal = 'y';
+            var w = 700; // width and height specified in pixels
+            var h = 500;
+            var xOffset = 60; // so it is not up against the edge of the page
+            var yOffset = 100;
+            var margin = 5;
+            
+            // create a xscale
+            var xScale = d3.scale.linear()
+						.domain([0, d3.max(data, function(d) { // .max finds the maximum data value
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([xOffset + margin, w - margin]);
+            
+            // create a yscale, but use xVal to scale instead
+            var yScale = d3.scale.linear()
+						// upper left of screen is 0,0 so values get bigger as we go down
+						.domain([0, d3.max(data, function(d) {
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([h - yOffset - margin, margin]);
+            
+            // create a regular yScale using the yVal to be used in part 3 and 4 of the code
+            var yScalePartThree = d3.scale.linear()
+						// upper left of screen is 0,0 so values get bigger as we go down
+						.domain([0, d3.max(data, function(d) {
+							return parseFloat(d[yVal]);
+						})+1])
+						.range([h - yOffset - margin, margin]);
+            
+            // create svg element to hold graph
+            var svg = d3.select("#partTwo").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            // create xAxis
+            var xAxis = d3.svg.axis()
+                              .scale(xScale)
+                              .orient("bottom");
+            // create xAxis graphic
+            var xAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+                            .call(xAxis);
+            // create yAxis
+            var yAxis = d3.svg.axis()
+					           .scale(yScale)
+					           .orient("left"); //puts axis at left of the vis
+	        // create yAxis graphic
+            var yAxisG = svg.append('g') // append a graphics element
+					       .attr('class', 'axis')
+					       .attr('transform', 'translate(' + xOffset + ', 0)')
+					       .call(yAxis);
+            // create x label 
+            var xLabel = svg.append("text")
+					.attr('class', 'label') //give it the class label
+					.attr('x', w/2) // where the text will go
+					.attr('y', h - xOffset + 10) // y offset
+					.text("x-values"); // text to be displayed
+            
+            // create a graph labe
+            var graphLabel = svg.append("text")
+                                .attr('class', 'label')
+                                .attr('x', w/2)
+                                .attr('y', xOffset/3.5)
+                                .text("Anscombe I")
+            
+            // create a bar graph element and load in the data
+            var bar = svg.selectAll(".bar")
+                           .data(data);
+            // enter the bar graph and append a rectangle for all x
+            // values with a height of the x value
+            bar.enter().append("svg:rect")
+                       .attr("x", function(d){return xScale(d[xVal])})
+                       .attr("y", function(d){return yScale(d[xVal])})
+                       .attr("width", 20)
+                        // http://jsfiddle.net/S575k/4/
+                        // I used the above url to help get the bars to rest on the x axis, the code
+                        // used yScale(0) - ysScale(value) to get it to do this. This makes it so the 
+                        // bars of the chart aren't going downwards and scales them to fit onto the 
+                        // x-axis
+                       .attr("height", function(d) {return (yScale(0) - yScale(d[xVal]) + 5);});
+            
+            // added a tooltip for my own use to check the x and y value for the bars
+            bar.append('svg:title')
+                 .text(function(d){return d['x']+ ', ' + d['x'];})
+        
+        
+        // Put your part three & four code here ***********************
+            // create another svg element in partThree
+            var svg = d3.select("#partThree").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            //create x axis
+            var xAxis = d3.svg.axis()
+					  .scale(xScale)
+					  .orient("bottom") //puts axis at bottom of the vis
+					  .ticks(10);	//draw five tick marks on the axis
+	       
+           // create x axis graphic
+	       var xAxisG = svg.append('g') // append a graphics element
+					       .attr('class', 'axis')
+					       .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+					       .call(xAxis);
+            
+            // create an x labe with title "x"
+	       var xLabel = svg.append("text")
+					       .attr('class', 'label') //give it the class label
+					       .attr('x', w/2) // where the text will go
+					       .attr('y', h - xOffset + 10)
+					       .text(xVal);
+			// create yAxis
+	       var yAxis = d3.svg.axis()
+					         .scale(yScalePartThree)
+					         .orient("left") //puts axis at left of the vis
+					         .ticks(10);	//draw five tick marks on the axis
+	       
+            // create yAxis graphic
+	       var yAxisG = svg.append('g') // append a graphics element
+				           .attr('class', 'axis')
+					       .attr('transform', 'translate(' + xOffset + ', 0)')
+					       .call(yAxis);
+            
+            // create yAxis label with title "y"
+	       var yLabel = svg.append("text")
+					.attr('class', 'label') //give it the class label
+					.attr('x', xOffset/2) // where the text will go
+					.attr('y', h/3)
+					.text('y');
+            
+            // create a graph labe
+            var graphLabel = svg.append("text")
+                                .attr('class', 'label')
+                                .attr('x', w/2)
+                                .attr('y', xOffset/3.5)
+                                .text("Anscombe I")
+            
+            // create point svgs for all data in the dataset
+            var point = svg.selectAll(".point") // returns nothing at the beginning
+                    .data(data); //select everything that has the class point, bind to the dataset
+            
+            // make the points a circle
+            point.enter().append("svg:circle");
+            
+            // add point with x and y coordinates from the data and set it to radius 5
+            point.attr("class", "point") // added the point
+                 .attr("cx", function(d){return xScale(d[xVal]);}) 
+		         .attr("cy", function(d){return yScalePartThree(d[yVal]);})
+                 .attr("r", 5)
+                 .attr("fill", "black")
+                    // create a mouse over where the circle turns blue when you mouse over it 
+                    // and returns to black when you move away
+                 .on("mouseover", function(d) {d3.select(this).style("fill", "blue");})
+                 .on("mouseout", function(d){d3.select(this).style("fill", "black");})
+                 .on("click", function(d){
+                //http://stackoverflow.com/questions/16765292/display-text-in-div-when-javascript-onclick
+                        document.getElementById("scatterLabel").innerHTML = d['x']+ ', ' + d['y'];});
+            
+            // bell tooltip
+            point.append('svg:title')
+                 .text(function(d){return d['x']+ ', ' + d['y'];});
+             
+        });
+        // Put your part five code here ***********************
+        
+        d3.csv('anscombe_I.csv', function(csvData){
+            var data = csvData;
+            var xVal = 'x';
+            var yVal = 'y';
+            var w = 550; // width and height specified in pixels
+            var h = 350;
+            var xOffset = 60; // so it is not up against the edge of the page
+            var yOffset = 100;
+            var margin = 5;
+                
+            var xScale = d3.scale.linear()
+						.domain([0, d3.max(data, function(d) { // .max finds the maximum data value
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([xOffset + margin, w - margin]);
+            
+            var yScale = d3.scale.linear()
+						// upper left of screen is 0,0 so values get bigger as we go down
+						.domain([0, d3.max(data, function(d) {
+							return parseFloat(d[yVal]);
+						})+1])
+						.range([h - yOffset - margin, margin]);
+            
+            var svg = d3.select("#scatterplotSet").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            
+            var xAxis = d3.svg.axis()
+					  .scale(xScale)
+					  .orient("bottom") //puts axis at bottom of the vis
+					  .ticks(10);	//draw five tick marks on the axis
+	
+	       var xAxisG = svg.append('g') // append a graphics element
+					       .attr('class', 'axis')
+					       .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+					       .call(xAxis);
+					
+	       var xLabel = svg.append("text")
+					       .attr('class', 'label') //give it the class label
+					       .attr('x', w/2) // where the text will go
+					       .attr('y', h - xOffset + 10)
+					       .text(xVal);
+			
+	       var yAxis = d3.svg.axis()
+					         .scale(yScale)
+					         .orient("left") //puts axis at left of the vis
+					         .ticks(10);	//draw five tick marks on the axis
+	
+	       var yAxisG = svg.append('g') // append a graphics element
+				           .attr('class', 'axis')
+					       .attr('transform', 'translate(' + xOffset + ', 0)')
+					       .call(yAxis);
+					
+	       var yLabel = svg.append("text")
+					.attr('class', 'label') //give it the class label
+					.attr('x', xOffset/2) // where the text will go
+					.attr('y', h/3)
+					.text(yVal);
+            
+            var graphLabel = svg.append("text")
+                                .attr('class', 'label')
+                                .attr('x', w/2)
+                                .attr('y', xOffset/3.5)
+                                .text("Anscombe I")
+            
+            var point = svg.selectAll(".point") // returns nothing at the beginning
+                    .data(data); //select everything that has the class point, bind to the dataset
+            
+            point.enter().append("svg:circle");
+            
+            point.attr("class", "point") // added the point
+                 .attr("cx", function(d){return xScale(d[xVal]);}) 
+		         .attr("cy", function(d){return yScale(d[yVal]);})
+                 .attr("r", 5);
+        });
+        
+        d3.csv('anscombe_II.csv', function(csvData){
+            var data = csvData;
+            var xVal = 'x';
+            var yVal = 'y';
+            var w = 550; // width and height specified in pixels
+            var h = 350;
+            var xOffset = 60; // so it is not up against the edge of the page
+            var yOffset = 100;
+            var margin = 5;
+                
+            var xScale = d3.scale.linear()
+						.domain([0, d3.max(data, function(d) { // .max finds the maximum data value
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([xOffset + margin, w - margin]);
+            
+            var yScale = d3.scale.linear()
+						// upper left of screen is 0,0 so values get bigger as we go down
+						.domain([0, d3.max(data, function(d) {
+							return parseFloat(d[yVal]);
+						})+1])
+						.range([h - yOffset - margin, margin]);
+            
+            var svg = d3.select("#scatterplotSet").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            
+            var xAxis = d3.svg.axis()
+					  .scale(xScale)
+					  .orient("bottom") //puts axis at bottom of the vis
+					  .ticks(10);	//draw five tick marks on the axis
+	
+	       var xAxisG = svg.append('g') // append a graphics element
+					       .attr('class', 'axis')
+					       .attr('transform', 'translate(1, ' + (h - yOffset) + ')')
+					       .call(xAxis);
+					
+	       var xLabel = svg.append("text")
+					       .attr('class', 'label') //give it the class label
+					       .attr('x', w/2) // where the text will go
+					       .attr('y', h - xOffset + 10)
+					       .text(xVal);
+			
+	       var yAxis = d3.svg.axis()
+					         .scale(yScale)
+					         .orient("left") //puts axis at left of the vis
+					         .ticks(10);	//draw five tick marks on the axis
+	
+	       var yAxisG = svg.append('g') // append a graphics element
+				           .attr('class', 'axis')
+					       .attr('transform', 'translate(' + xOffset + ', 0)')
+					       .call(yAxis);
+					
+	       var yLabel = svg.append("text")
+					.attr('class', 'label') //give it the class label
+					.attr('x', xOffset/2) // where the text will go
+					.attr('y', h/3)
+					.text(yVal);
+            
+            var graphLabel = svg.append("text")
+                                .attr('class', 'label')
+                                .attr('x', w/2)
+                                .attr('y', xOffset/3.5)
+                                .text("Anscombe II")
+            
+            var point = svg.selectAll(".point") // returns nothing at the beginning
+                    .data(data); //select everything that has the class point, bind to the dataset
+            
+            point.enter().append("svg:circle");
+            
+            point.attr("class", "point") // added the point
+                 .attr("cx", function(d){return xScale(d[xVal]);}) 
+		         .attr("cy", function(d){return yScale(d[yVal]);})
+                 .attr("r", 5);
+        });
+        d3.csv('anscombe_III.csv', function(csvData){
+            var data = csvData;
+            var xVal = 'x';
+            var yVal = 'y';
+            var w = 550; // width and height specified in pixels
+            var h = 350;
+            var xOffset = 60; // so it is not up against the edge of the page
+            var yOffset = 100;
+            var margin = 5;
+                
+            var xScale = d3.scale.linear()
+						.domain([0, d3.max(data, function(d) { // .max finds the maximum data value
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([xOffset + margin, w - margin]);
+            
+            var yScale = d3.scale.linear()
+						// upper left of screen is 0,0 so values get bigger as we go down
+						.domain([0, d3.max(data, function(d) {
+							return parseFloat(d[yVal]);
+						})+1])
+						.range([h - yOffset - margin, margin]);
+            
+            var svg = d3.select("#scatterplotSet").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            
+            var xAxis = d3.svg.axis()
+					  .scale(xScale)
+					  .orient("bottom") //puts axis at bottom of the vis
+					  .ticks(10);	//draw five tick marks on the axis
+	
+	       var xAxisG = svg.append('g') // append a graphics element
+					       .attr('class', 'axis')
+					       .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+					       .call(xAxis);
+					
+	       var xLabel = svg.append("text")
+					       .attr('class', 'label') //give it the class label
+					       .attr('x', w/2) // where the text will go
+					       .attr('y', h - xOffset + 10)
+					       .text(xVal);
+			
+	       var yAxis = d3.svg.axis()
+					         .scale(yScale)
+					         .orient("left") //puts axis at left of the vis
+					         .ticks(10);	//draw five tick marks on the axis
+	
+	       var yAxisG = svg.append('g') // append a graphics element
+				           .attr('class', 'axis')
+					       .attr('transform', 'translate(' + xOffset + ', 0)')
+					       .call(yAxis);
+					
+	       var yLabel = svg.append("text")
+					.attr('class', 'label') //give it the class label
+					.attr('x', xOffset/2) // where the text will go
+					.attr('y', h/3)
+					.text(yVal);
+            
+            var graphLabel = svg.append("text")
+                                .attr('class', 'label')
+                                .attr('x', w/2)
+                                .attr('y', xOffset/3.5)
+                                .text("Anscombe III")
+            
+            var point = svg.selectAll(".point") // returns nothing at the beginning
+                    .data(data); //select everything that has the class point, bind to the dataset
+            
+            point.enter().append("svg:circle");
+            
+            point.attr("class", "point") // added the point
+                 .attr("cx", function(d){return xScale(d[xVal]);}) 
+		         .attr("cy", function(d){return yScale(d[yVal]);})
+                 .attr("r", 5);
+        });
+        d3.csv('anscombe_IV.csv', function(csvData){
+            var data = csvData;
+            var xVal = 'x';
+            var yVal = 'y';
+            var w = 550; // width and height specified in pixels
+            var h = 350;
+            var xOffset = 60; // so it is not up against the edge of the page
+            var yOffset = 100;
+            var margin = 5;
+                
+            var xScale = d3.scale.linear()
+						.domain([0, d3.max(data, function(d) { // .max finds the maximum data value
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([xOffset + margin, w - margin]);
+            
+            var yScale = d3.scale.linear()
+						// upper left of screen is 0,0 so values get bigger as we go down
+						.domain([0, d3.max(data, function(d) {
+							return parseFloat(d[xVal]);
+						})+1])
+						.range([h - yOffset - margin, margin]);
+            
+            var svg = d3.select("#scatterplotSet").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            
+            var xAxis = d3.svg.axis()
+					  .scale(xScale)
+					  .orient("bottom") //puts axis at bottom of the vis
+					  .ticks(10);	//draw five tick marks on the axis
+	
+	       var xAxisG = svg.append('g') // append a graphics element
+					       .attr('class', 'axis')
+					       .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+					       .call(xAxis);
+					
+	       var xLabel = svg.append("text")
+					       .attr('class', 'label') //give it the class label
+					       .attr('x', w/2) // where the text will go
+					       .attr('y', h - xOffset + 10)
+					       .text(xVal);
+			
+	       var yAxis = d3.svg.axis()
+					         .scale(yScale)
+					         .orient("left") //puts axis at left of the vis
+					         .ticks(10);	//draw five tick marks on the axis
+	
+	       var yAxisG = svg.append('g') // append a graphics element
+				           .attr('class', 'axis')
+					       .attr('transform', 'translate(' + xOffset + ', 0)')
+					       .call(yAxis);
+					
+	       var yLabel = svg.append("text")
+					.attr('class', 'label') //give it the class label
+					.attr('x', xOffset/2) // where the text will go
+					.attr('y', h/3)
+					.text(yVal);
+            
+            var graphLabel = svg.append("text")
+                                .attr('class', 'label')
+                                .attr('x', w/2)
+                                .attr('y', xOffset/3.5)
+                                .text("Anscombe IV")
+            
+            var point = svg.selectAll(".point") // returns nothing at the beginning
+                    .data(data); //select everything that has the class point, bind to the dataset
+            
+            point.enter().append("svg:circle");
+            
+            point.attr("class", "point") // added the point
+                 .attr("cx", function(d){return xScale(d[xVal]);}) 
+		         .attr("cy", function(d){return yScale(d[yVal]);})
+                 .attr("r", 5);
+        });
+        
+    </script>
+</body>
+
+
+</html>

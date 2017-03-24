@@ -1,0 +1,75 @@
+body {
+  font-family: sans-serif;
+  font-size: 11px;
+  text-align:center;
+  background-color: steelblue;
+}
+
+section{
+  margin: 0 auto;
+  padding: 0px 20px;
+  background-color: #EEE;
+  border: 1px solid #444;
+}
+
+section h1{
+  text-align:center;
+  line-height: 1.5em;
+  font-size: 2em;
+  margin: 0.1em;
+}
+
+section div{
+  margin-bottom: 20px;
+}
+
+#partOne{
+  border-bottom: 2px solid lightgrey;
+}
+
+#partOne p{
+  padding: 0;
+  margin: 5px 0px;
+  text-align:left;
+  display: inline-block;
+  margin-right: 10px;
+  border-bottom: 1px dashed grey;
+}
+
+#scatterplotSet{
+  text-align:center;
+  min-height:250px;
+}
+
+svg.sm{
+  margin: 0 auto;
+  display: inline-block;
+}
+
+svg.white{
+  background-color:white;
+}
+
+.inline{
+  display: inline-block;
+  margin: 0px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.point {
+  fill: #f00;
+  stroke: #000;
+}
+
+.label {
+    text-anchor: middle;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}

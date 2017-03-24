@@ -1,0 +1,68 @@
+body {
+    font-family: sans-serif;
+    font-size: 12px;
+}
+.x1axis,
+.x2axis,
+.x4axis,
+.y1axis,
+.y2axis,
+.y4axis,
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.point {
+    fill: #00BDFF; 
+    
+}
+
+.label {
+    text-anchor: middle;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer; 
+}
+
+.menu 
+{
+    background-color:#B2A700;
+    border-color:#B2A700;
+    font-size: 16px;
+    overflow: hidden;
+    border-width: 10px;
+}
+
+
+.bar{
+    fill: #FF003D;
+    width: 20;
+}
+
+.bar2{
+    fill: #FF003D;
+    width: 20;
+}
+
+.tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+.point:hover {
+  fill: #FF003D;
+}
+.bar:hover{
+    
+    fill: #00BDFF;
+}
+
+.bar2:hover{
+    fill: #00BDFF;
+}

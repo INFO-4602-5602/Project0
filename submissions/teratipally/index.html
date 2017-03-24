@@ -1,0 +1,991 @@
+<html>
+<head>
+<title>Project 0</title>
+<link rel="stylesheet" type="text/css" href="project0.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One </h1>
+	</div>
+    <br/>
+    <div id="partTwo">
+        <h1>Part Two </h1>
+        <div id="barchart">
+        </div>
+	</div>
+    <br/>
+    <div id="partThree">
+        <h1>Part Three &amp; Four </h1>
+        <div id="comboboxDiv"></div>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    <div id="partFive">
+        <h1>Part Five </h1>
+        <br/>
+        <div class="float half" id="firstscatterplot">
+            <p id="firstscatterplotLabel"></p>
+        </div>
+        <div class="float half" id="secondscatterplot">
+            <p id="secondscatterplotLabel"></p>
+        </div>
+        <br/>
+        <div class="float half" id="thirdscatterplot">
+            <p id="thirdscatterplotLabel"></p>
+        </div>
+        <div class="float half" id="forthscatterplot">
+            <p id="forthscatterplotLabel"></p>
+        </div>
+        
+	</div>
+    <br/>
+    <br/>
+    <div>
+        <h1> Coodinated X and Y </h1>
+        <div class="float half" id="xbargraph">
+        </div>
+        <div class="float half" id="ybargraph">
+        </div>
+    
+    </div>
+    
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+        
+        //accessing the filenames by maintaining the list of the filenames
+        var fileNames=["data/anscombe_I.csv","data/anscombe_II.csv","data/anscombe_III.csv","data/anscombe_IV.csv"];
+        var fileNamesLength=fileNames.length;
+        var results=[];
+        var fileData=[];
+        fileNames.forEach( function(f) {
+           d3.csv(f, function(data) 
+                  {
+                        checkDataset(data); 
+                        results.push(data);
+                        if(results.length==1)
+                            {
+                                fileData=data;
+                            }
+                 });
+        });
+        
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>Data loaded correctly</p>").attr("class","datacheckLabel");
+            else
+                $("#partOne").append("<p>ata loaded incorrectly. Try using the debugger to help you find the bug!</p>").attr("class","datacheckLabel");
+        }
+        
+/*******************************************************************PART TWO*********************************************************************************
+************************************************************************************************************************************************************/
+        
+        // Put your part two code here ***********************
+        
+        //Setting the width and the height
+        var margin = {top:20, bottom:30, right:20, left:40}, width = 800 - margin.left - margin.right, 
+            height = 500 - margin.top - margin.bottom;
+        
+        //X and Y axis 
+        var x = d3.scale.linear().range([0, width]);
+        
+        var y = d3.scale.linear().range([height, 0]);
+        
+        //array to copy the values of x
+        var dataList=[];
+        
+        //creating an svg for bar graph
+        var svg = d3.select("#barchart").append("svg:svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", 
+          "translate(" + margin.left + "," + margin.top + ")");
+        
+        d3.csv("data/anscombe_I.csv", function(data) {
+            var i = 1;
+            data.forEach( function (d) {
+                
+                var tempobject = {rankIndex: i, value: 0};
+                tempobject.value = parseInt(d.x);
+                dataList.push(tempobject);
+                i++;
+                
+            });
+            
+            //X and Y axis domains
+            var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(10);
+            var yAxis = d3.svg.axis().scale(y).orient("left");
+            
+            x.domain([0, d3.max(dataList, function(d) { return d.rankIndex; })]);
+            y.domain([0, d3.max(dataList, function(d) { return d.value; })]);
+
+    
+        //appending the X and Y axis
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+        .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", "-.55em")
+          .attr("transform", "rotate(-90)" )
+
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("X Values");
+
+        // creating the bar graphs
+        svg.selectAll("bar")
+          .data(dataList)
+        .enter().append("rect")
+          .style("fill", "#4682B4")
+          .attr("x", function(d) { return x(d.rankIndex); })
+          .attr("width", 30)
+          .attr("y", function(d) { return y(d.value); })
+          .attr("height", function(d) { return height - y(d.value);});
+        });
+        
+/*******************************************************************PART THREE AND FOUR**********************************************************************
+************************************************************************************************************************************************************/     
+        // Put your part three & four code here ***********************
+        
+        //Setting up the margin for the SCatter plot
+        var scatterplotMargin  = {top:20, bottom: 30, right: 20, left: 40}, scatterplotwidth = 900 - scatterplotMargin.left - scatterplotMargin.right
+        , scatterplotheight = 600 - scatterplotMargin.top - scatterplotMargin.bottom;
+        
+        var scatterPlotx = d3.scale.linear().range([0, scatterplotwidth]);
+        
+        var scatterPloty = d3.scale.linear().range([scatterplotheight, 0]);
+        
+        var color = d3.scale.category10();
+        
+        var selectData = [ {"text": "Anscombe_I"}, {"text" : "Anscombe_II"}, {"text" : "Anscombe_III"}, {"text":"Anscombe_IV"}];
+        
+        
+        var body = d3.select("#comboboxDiv");
+        
+        //adding the text box
+        var span = body.append("span").attr("class", "comboboxDivspan").text("Select Data set:  ");
+        
+        //adding the dropdown menu
+        var yInput = body.append("select")
+                    .attr("id","xSelect")
+                    .attr("class", "styled-select semi-square")
+                    .on("change",dataChange)
+                    .selectAll("option")
+                    .data(selectData)
+                    .enter()
+                    .append("option")
+                    .attr("value", function (d) { return d.text; })
+                    .text(function (d) { return d.text ;})
+        
+        //X values for mapping and setting the X axis
+        var xVal = function(d) { return parseFloat(d.x);},
+            xScale = d3.scale.linear().range([0, scatterplotwidth]),
+            xMap = function(d) { return xScale(xVal(d)); },
+            scatterPlotxAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(10);
+        
+        //Y values for mapping and setting the Y axis
+        var yVal = function(d) { return parseFloat(d.y);},
+            yScale = d3.scale.linear().range([scatterplotheight, 0]),
+            yMap = function(d) {return yScale(yVal(d));},
+            scatterPlotyAxis = d3.svg.axis().scale(yScale).orient("left").ticks(10);
+        
+        //Tooltip for the points in the scatter plot        
+        var tooltip = d3.select("#scatterLabel").style("opacity", 0);
+        
+        var tooltiptext = d3.select("#scatterplot").append("div").attr("class","tooltip").style("opacity", 0);
+        
+        
+        //creating the svg for the scatterplot
+        var scatterPlotsvg = d3.select("#scatterplot").append("svg")
+            .attr("width", scatterplotwidth + scatterplotMargin.left + scatterplotMargin.right)
+            .attr("height", scatterplotheight + scatterplotMargin.top + scatterplotMargin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + scatterplotMargin.left + "," + scatterplotMargin.top + ")");
+        
+        //Default value for the combobox
+        this.value = "Anscombe_I";
+        d3.csv("data/anscombe_I.csv", function(data) { 
+            
+            xScale.domain([0, d3.max(data, xVal) + 1]);
+            yScale.domain([0, d3.max(data, yVal) + 1]);
+            
+            //Appending the X and Y axes
+            scatterPlotsvg.append("svg:g")
+            .attr("class", "x axis")
+            .attr("id", "xaxis")
+            .attr("transform", "translate(0," + scatterplotheight + ")")
+            .call(scatterPlotxAxis)
+            .append("text")
+            .attr("class", "grid")
+            .attr("x", scatterplotwidth)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("X Values");
+        
+            scatterPlotsvg.append("svg:g")
+            .attr("class", "y axis")
+            .attr("id", "yaxis")
+            .call(scatterPlotyAxis)
+            .append("text")
+            .attr("class", "grid")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Y Values");
+            
+            //Scatterplot for the ANSCOMBE_I with tooltip when the users hovers on the point
+            scatterPlotsvg.selectAll(".dot").data(data)
+            .enter().append("circle").attr("class", "dot")
+            .attr("r", 5)
+            .attr("cx", xMap)
+            .attr("cy", yMap)   
+            .attr("fill", "#e41a1c")
+            .on("mouseover", function(d) {
+                d3.select(this).attr("r", 10).style("fill", "blue");
+               tooltip.transition().duration(200).attr("class", "label")
+               .style("opacity",.9);
+                tooltiptext.transition().duration(200)
+               .style("opacity",.9);
+                
+                tooltip.html("X Value: " + d.x + "<br/> Y Value: " + d.y);
+                tooltiptext.html("X : " + d.x + "<br/> Y : " + d.y).style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+                
+            }).on("mouseout", function(d) { tooltip.transition().duration(300).style("opacity", 0);
+                                          d3.select(this).attr("r", 5).style("fill", "#e41a1c");
+                                          tooltiptext.transition().duration(300).style("opacity", 0);})
+            });
+        
+        
+        //function to update the scatter plot according to the dataset selected
+        function dataChange() {
+        
+        var selectedText;
+            
+        selectedText = "data/" + this.value + ".csv";
+        
+        d3.csv(selectedText, function(data) { 
+        
+            scatterPlotsvg.selectAll(".dot").remove();
+            
+            xScale.domain([0, d3.max(data, xVal) + 1]);
+            yScale.domain([0, d3.max(data, yVal) + 1]);
+            
+            scatterPlotxAxis.scale(xScale);
+            scatterPlotyAxis.scale(yScale);
+            
+            d3.select("#yaxis").transition().duration(100).call(scatterPlotyAxis);
+            d3.select("#xaxis").transition().duration(100).call(scatterPlotxAxis);
+            
+            
+            //scatterPlotsvg.select("#scatterplot").transition().duration(100);
+            
+            scatterPlotsvg.selectAll(".dot").data(data)
+            .enter().append("circle").attr("class", "dot")
+            .attr("r", 5)
+            .attr("cx", xMap)
+            .attr("cy", yMap)   
+            .attr("fill", "#e41a1c")
+            .on("mouseover", function(d) {
+                d3.select(this).attr("r", 10).style("fill", "blue");
+               tooltip.transition().duration(200).attr("class", "label")
+               .style("opacity",.9);
+                tooltiptext.transition().duration(200)
+               .style("opacity",.9);
+                
+                tooltip.html("X Value: " + d.x + "<br/> Y Value: " + d.y);
+                tooltiptext.html("X : " + d.x + "<br/> Y : " + d.y).style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+                
+            }).on("mouseout", function(d) { tooltip.transition().duration(300).style("opacity", 0);
+                                          d3.select(this).attr("r", 5).style("fill", "#e41a1c");
+                                          tooltiptext.transition().duration(300).style("opacity", 0);})
+            
+            
+        
+        });
+        
+        }
+        
+/*******************************************************************PART FIVE********************************************************************************
+************************************************************************************************************************************************************/         
+/**********************************************************SCATTER PLOT FOR ANSCOMBE_II********************************************************************/
+        
+        // Put your part five code here ***********************
+        
+        var scatterplotMargin_I  = {top:20, bottom: 30, right: 20, left: 40}, scatterplotwidth_I = 600 - scatterplotMargin_I.left - scatterplotMargin_I.right
+        , scatterplotheight_I = 600 - scatterplotMargin_I.top - scatterplotMargin_I.bottom;
+        
+        var scatterPlotx_I = d3.scale.linear().range([0, scatterplotwidth_I]);
+        
+        var scatterPloty_I = d3.scale.linear().range([scatterplotheight_I, 0]);
+        
+        
+        
+        var xVal_I = function(d) { return parseFloat(d.x);},
+            xScale_I = d3.scale.linear().range([0, scatterplotwidth_I]),
+            xMap_I = function(d) { return xScale_I(xVal_I(d)); },
+            scatterPlotxAxis_I = d3.svg.axis().scale(xScale_I).orient("bottom").ticks(10);
+        
+        var yVal_I = function(d) { return parseFloat(d.y);},
+            yScale_I = d3.scale.linear().range([scatterplotheight_I, 0]),
+            yMap_I = function(d) {return yScale_I(yVal_I(d));},
+            scatterPlotyAxis_I = d3.svg.axis().scale(yScale_I).orient("left").ticks(10);
+        
+        
+        var line_x = d3.svg.line()
+        .x(function(d) {
+            return xScale_I(parseFloat(d.x));
+        })
+        .y(function(d) {
+            return yScale_I(parseFloat(d.yslope));
+        });
+        
+        var scatterPlotsvg_I = d3.select("#firstscatterplot").append("svg")
+        .attr("width", scatterplotwidth_I + scatterplotMargin_I.left + scatterplotMargin_I.right)
+        .attr("height", scatterplotheight_I + scatterplotMargin_I.top + scatterplotMargin_I.bottom)
+        .append("g")
+        .attr("title", "Anscombe_I")
+        .attr("transform", "translate(" + scatterplotMargin_I.left + "," + scatterplotMargin_I.top + ")");
+        
+        var tooltip_I = d3.select("#firstscatterplot").append("div").attr("class", "tooltip").style("opacity", 0);
+        
+        
+        
+        d3.csv("data/anscombe_I.csv", function(data) { 
+            
+            
+            xScale_I.domain([0, d3.max(data, xVal_I) + 1]);
+            yScale_I.domain([0, d3.max(data, yVal_I) + 1]);
+            
+            scatterPlotsvg_I.append("text")
+            .attr("transform",
+              "translate(" + (width/4) + " ," + 
+                             (0) + ")")
+            .style("text-anchor", "middle")
+            .text("ANSCOMBE_I")
+            .attr("class","label");
+            
+            scatterPlotsvg_I.append("br");
+            
+            
+            scatterPlotsvg_I.append("svg:g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + scatterplotheight_I + ")")
+            .call(scatterPlotxAxis_I)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", scatterplotwidth_I)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("X Values");
+        
+            scatterPlotsvg_I.append("svg:g")
+            .attr("class", "y axis")
+            .call(scatterPlotyAxis_I)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Y Values");
+            
+            var data_manipulated_I = linearRegression_data(data);
+            
+            scatterPlotsvg_I.append("path")
+            .datum(data_manipulated_I)
+            .attr("class", "line")
+            .attr("d", line_x);
+            
+            //scatterPlotsvg_I.append("line").attr("d", valueline_I(data)).attr("class", "line");
+            
+            scatterPlotsvg_I.selectAll(".dot").data(data)
+            .enter().append("circle").attr("class", "dot")
+            .attr("r", 5)
+            .attr("cx", xMap_I)
+            .attr("cy", yMap_I)   
+            .attr("fill", "#e41a1c")
+            .on("mouseover", function(d) {
+                d3.select(this).attr("r", 10).style("fill", "blue");
+               tooltip_I.transition().duration(200)
+               .style("opacity",.9);
+                tooltip_I.html("X : " + d.x + "<br/> Y : " + d.y)
+                .style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+                
+            }).on("mouseout", function(d) { tooltip_I.transition().duration(300).style("opacity", 0);
+                                          d3.select(this).attr("r", 5).style("fill", "#e41a1c");})
+            
+
+            
+        
+        
+        });
+        
+/**********************************************************SCATTER PLOT FOR ANSCOMBE_II********************************************************************/
+        
+        var scatterplotMargin_II  = {top:20, bottom: 30, right: 20, left: 40}, scatterplotwidth_II = 600 - scatterplotMargin_II.left - scatterplotMargin_II.right
+        , scatterplotheight_II = 600 - scatterplotMargin_II.top - scatterplotMargin_II.bottom;
+        
+        var scatterPlotx_II = d3.scale.linear().range([0, scatterplotwidth_II]);
+        
+        var scatterPloty_II = d3.scale.linear().range([scatterplotheight_II, 0]);
+    
+        
+        var xVal_II = function(d) { return parseFloat(d.x);},
+            xScale_II = d3.scale.linear().range([0, scatterplotwidth_II]),
+            xMap_II = function(d) { return xScale_II(xVal_II(d)); },
+            scatterPlotxAxis_II = d3.svg.axis().scale(xScale_II).orient("bottom").ticks(10);
+        
+        var yVal_II = function(d) { return parseFloat(d.y);},
+            yScale_II = d3.scale.linear().range([scatterplotheight_II, 0]),
+            yMap_II = function(d) {return yScale_II(yVal_II(d));},
+            scatterPlotyAxis_II = d3.svg.axis().scale(yScale_II).orient("left").ticks(10);
+            
+        var scatterPlotsvg_II = d3.select("#secondscatterplot").append("svg")
+        .attr("width", scatterplotwidth_II + scatterplotMargin_II.left + scatterplotMargin_II.right)
+        .attr("height", scatterplotheight_II + scatterplotMargin_II.top + scatterplotMargin_II.bottom)
+        .append("g")
+        .attr("transform", "translate(" + scatterplotMargin_II.left + "," + scatterplotMargin_II.top + ")");
+        
+        var tooltip_II = d3.select("#secondscatterplot").append("div").attr("class", "tooltip").style("opacity", 0);
+        
+        var line_x_II = d3.svg.line()
+        .x(function(d) {
+            return xScale_II(parseFloat(d.x));
+        })
+        .y(function(d) {
+            return yScale_II(parseFloat(d.yslope));
+        });
+        
+        d3.csv("data/anscombe_II.csv", function(data) { 
+            
+            xScale_II.domain([0, d3.max(data, xVal_II) + 1]);
+            yScale_II.domain([0, d3.max(data, yVal_II) + 1]);
+            
+            
+            scatterPlotsvg_II.append("svg:g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + scatterplotheight_II + ")")
+            .call(scatterPlotxAxis_II)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", scatterplotwidth_II)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("X Values");
+        
+            scatterPlotsvg_II.append("svg:g")
+            .attr("class", "y axis")
+            .call(scatterPlotyAxis_II)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Y Values");
+            
+            scatterPlotsvg_II.append("text")
+            .attr("transform",
+              "translate(" + (width/4) + " ," + 
+                             (0) + ")")
+            .style("text-anchor", "middle")
+            .text("ANSCOMBE_II")
+            .attr("class","label");
+            
+            scatterPlotsvg_II.append("br");
+            
+            var data_manipulated_II = linearRegression_data(data);
+            
+            scatterPlotsvg_II.append("path")
+            .datum(data_manipulated_II)
+            .attr("class", "line")
+            .attr("d", line_x_II);
+            
+            scatterPlotsvg_II.selectAll(".dot").data(data)
+            .enter().append("circle").attr("class", "dot")
+            .attr("r", 5)
+            .attr("cx", xMap_II)
+            .attr("cy", yMap_II)   
+            .attr("fill", "#e41a1c")
+            .on("mouseover", function(d) {
+                d3.select(this).attr("r", 10).style("fill", "blue");
+               tooltip_II.transition().duration(200)
+               .style("opacity",.9);
+                tooltip_II.html("X : " + d.x + "<br/> Y : " + d.y)
+                .style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+                
+            }).on("mouseout", function(d) { tooltip_II.transition().duration(300).style("opacity", 0);
+                                          d3.select(this).attr("r", 5).style("fill", "#e41a1c");})
+            
+        
+        
+        });
+        
+/**********************************************************SCATTER PLOT FOR ANSCOMBE_III********************************************************************/
+        
+        var scatterplotMargin_III  = {top:20, bottom: 30, right: 20, left: 40}, scatterplotwidth_III = 600 - scatterplotMargin_III.left - scatterplotMargin_III.right
+        , scatterplotheight_III = 600 - scatterplotMargin_III.top - scatterplotMargin_III.bottom;
+        
+        var scatterPlotx_III = d3.scale.linear().range([0, scatterplotwidth_III]);
+        
+        var scatterPloty_III = d3.scale.linear().range([scatterplotheight_III, 0]);
+    
+        
+        var xVal_III = function(d) { return parseFloat(d.x);},
+            xScale_III = d3.scale.linear().range([0, scatterplotwidth_III]),
+            xMap_III = function(d) { return xScale_III(xVal_III(d)); },
+            scatterPlotxAxis_III = d3.svg.axis().scale(xScale_III).orient("bottom").ticks(10);
+        
+        var yVal_III = function(d) { return parseFloat(d.y);},
+            yScale_III = d3.scale.linear().range([scatterplotheight_III, 0]),
+            yMap_III = function(d) {return yScale_III(yVal_III(d));},
+            scatterPlotyAxis_III = d3.svg.axis().scale(yScale_III).orient("left").ticks(10);
+            
+        var scatterPlotsvg_III = d3.select("#thirdscatterplot").append("svg")
+        .attr("width", scatterplotwidth_III + scatterplotMargin_III.left + scatterplotMargin_III.right)
+        .attr("height", scatterplotheight_III + scatterplotMargin_III.top + scatterplotMargin_III.bottom)
+        .append("g")
+        .attr("transform", "translate(" + scatterplotMargin_III.left + "," + scatterplotMargin_III.top + ")");
+        
+        var tooltip_III = d3.select("#thirdscatterplot").append("div").attr("class", "tooltip").style("opacity", 0);
+        
+        var line_x_III = d3.svg.line()
+        .x(function(d) {
+            return xScale_III(parseFloat(d.x));
+        })
+        .y(function(d) {
+            return yScale_III(parseFloat(d.yslope));
+        });
+        
+        d3.csv("data/anscombe_III.csv", function(data) { 
+            
+            xScale_III.domain([0, d3.max(data, xVal_III) + 1]);
+            yScale_III.domain([0, d3.max(data, yVal_III) + 1]);
+            
+            
+            scatterPlotsvg_III.append("svg:g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + scatterplotheight_III + ")")
+            .call(scatterPlotxAxis_III)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", scatterplotwidth_III)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("X Values");
+        
+            scatterPlotsvg_III.append("svg:g")
+            .attr("class", "y axis")
+            .call(scatterPlotyAxis_III)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Y Values");
+            
+            scatterPlotsvg_III.append("text")
+            .attr("transform",
+              "translate(" + (width/4) + " ," + 
+                             (0) + ")")
+            .style("text-anchor", "middle")
+            .text("ANSCOMBE_III")
+            .attr("class","label");
+            
+            scatterPlotsvg_III.append("br");
+            
+            var data_manipulated_III = linearRegression_data(data);
+            
+            scatterPlotsvg_III.append("path")
+            .datum(data_manipulated_III)
+            .attr("class", "line")
+            .attr("d", line_x_III);
+            
+            scatterPlotsvg_III.selectAll(".dot").data(data)
+            .enter().append("circle").attr("class", "dot")
+            .attr("r", 5)
+            .attr("cx", xMap_III)
+            .attr("cy", yMap_III)   
+            .attr("fill", "#e41a1c")
+            .on("mouseover", function(d) {
+                d3.select(this).attr("r", 10).style("fill", "blue");
+               tooltip_III.transition().duration(200)
+               .style("opacity",.9);
+                tooltip_III.html("X : " + d.x + "<br/> Y : " + d.y)
+                .style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+                
+            }).on("mouseout", function(d) { tooltip_III.transition().duration(300).style("opacity", 0);
+                                          d3.select(this).attr("r", 5).style("fill", "#e41a1c");})
+            
+        
+        
+        });
+        
+/**********************************************************SCATTER PLOT FOR ANSCOMBE_IV*********************************************************************/
+        
+        var scatterplotMargin_IV  = {top:20, bottom: 30, right: 20, left: 40}, scatterplotwidth_IV = 600 - scatterplotMargin_IV.left - scatterplotMargin_IV.right
+        , scatterplotheight_IV = 600 - scatterplotMargin_IV.top - scatterplotMargin_IV.bottom;
+        
+        var scatterPlotx_IV = d3.scale.linear().range([0, scatterplotwidth_IV]);
+        
+        var scatterPloty_IV = d3.scale.linear().range([scatterplotheight_IV, 0]);
+    
+        
+        var xVal_IV = function(d) { return parseFloat(d.x);},
+            xScale_IV = d3.scale.linear().range([0, scatterplotwidth_IV]),
+            xMap_IV = function(d) { return xScale_IV(xVal_IV(d)); },
+            scatterPlotxAxis_IV = d3.svg.axis().scale(xScale_IV).orient("bottom").ticks(10);
+        
+        var yVal_IV = function(d) { return parseFloat(d.y);},
+            yScale_IV = d3.scale.linear().range([scatterplotheight_IV, 0]),
+            yMap_IV = function(d) {return yScale_IV(yVal_IV(d));},
+            scatterPlotyAxis_IV = d3.svg.axis().scale(yScale_IV).orient("left").ticks(10);
+            
+        var scatterPlotsvg_IV = d3.select("#forthscatterplot").append("svg")
+        .attr("width", scatterplotwidth_IV + scatterplotMargin_IV.left + scatterplotMargin_IV.right)
+        .attr("height", scatterplotheight_IV + scatterplotMargin_IV.top + scatterplotMargin_IV.bottom)
+        .append("g")
+        .attr("transform", "translate(" + scatterplotMargin_IV.left + "," + scatterplotMargin_IV.top + ")");
+        
+        var tooltip_IV = d3.select("#forthscatterplot").append("div").attr("class", "tooltip").style("opacity", 0);
+        
+        var line_x_IV = d3.svg.line()
+        .x(function(d) {
+            return xScale_I(parseFloat(d.x));
+        })
+        .y(function(d) {
+            return yScale_I(parseFloat(d.yslope));
+        });
+        
+        d3.csv("data/anscombe_IV.csv", function(data) { 
+            
+            xScale_IV.domain([0, d3.max(data, xVal_IV) + 1]);
+            yScale_IV.domain([0, d3.max(data, yVal_IV) + 1]);
+            
+            
+            scatterPlotsvg_IV.append("svg:g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + scatterplotheight_IV + ")")
+            .call(scatterPlotxAxis_IV)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", scatterplotwidth_IV)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("X Values");
+        
+            scatterPlotsvg_IV.append("svg:g")
+            .attr("class", "y axis")
+            .call(scatterPlotyAxis_IV)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Y Values");
+            
+            scatterPlotsvg_IV.append("text")
+            .attr("transform",
+              "translate(" + (width/4) + " ," + 
+                             (0) + ")")
+            .style("text-anchor", "middle")
+            .text("ANSCOMBE_IV")
+            .attr("class","label");
+            
+            var data_manipulated_IV = linearRegression_data(data);
+            
+            scatterPlotsvg_IV.append("path")
+            .datum(data_manipulated_IV)
+            .attr("class", "line")
+            .attr("d", line_x_IV);
+            
+            scatterPlotsvg_IV.selectAll(".dot").data(data)
+            .enter().append("circle").attr("class", "dot")
+            .attr("r", 5)
+            .attr("cx", xMap_IV)
+            .attr("cy", yMap_IV)   
+            .attr("fill", "#e41a1c")
+            .on("mouseover", function(d) {
+                d3.select(this).attr("r", 10).style("fill", "blue");
+               tooltip_IV.transition().duration(200)
+               .style("opacity",.9);
+                tooltip_IV.html("X : " + d.x + "<br/> Y : " + d.y)
+                .style("left", d3.event.pageX + "px").style("top", d3.event.pageY - 28 + "px");
+                
+            }).on("mouseout", function(d) { tooltip_IV.transition().duration(300).style("opacity", 0);
+                                          d3.select(this).attr("r", 5).style("fill", "#e41a1c");})
+            
+        
+        
+        });
+        
+        
+/*************************************************************COORDINATED X AND Y AXES**********************************************************************
+************************************************************************************************************************************************************/   
+    // Co ordinated X and Y axes
+        
+/*************************************************************BAR GRAPH FOR X VALUES************************************************************************/
+        
+        var margin_x = {top:20, bottom:30, right:20, left:40}, width_x = 600 - margin_x.left - margin_x.right, 
+            height_x = 500 - margin_x.top - margin_x.bottom;
+        
+        var x_x = d3.scale.linear().range([0, width_x]);
+        
+        var y_x = d3.scale.linear().range([height_x, 0]);
+        
+        var dataList_x=[];
+        
+        var svg_x = d3.select("#xbargraph").append("svg:svg")
+        .attr("width", width_x + margin_x.left + margin_x.right)
+        .attr("height", height_x + margin_x.top + margin_x.bottom)
+        .append("g")
+        .attr("transform", 
+          "translate(" + margin_x.left + "," + margin_x.top + ")");
+        
+        d3.csv("data/anscombe_I.csv", function(data) {
+            var i = 1;
+            data.forEach( function (d) {
+                
+                var tempobject = {rankIndex: i, value: 0};
+                tempobject.value = parseInt(d.x);
+                dataList_x.push(tempobject);
+                i++;
+                
+            });
+            
+            
+            var xAxis_x = d3.svg.axis().scale(x_x).orient("bottom").ticks(10);
+            var yAxis_x = d3.svg.axis().scale(y_x).orient("left");
+            
+            x_x.domain([0, d3.max(dataList, function(d) { return d.rankIndex; })]);
+            y_x.domain([0, d3.max(dataList, function(d) { return d.value; })]);
+
+            
+        svg_x.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height_x + ")")
+              .call(xAxis_x)
+            .selectAll("text")
+              .style("text-anchor", "end")
+              .attr("dx", "-.8em")
+              .attr("dy", "-.55em")
+              .attr("transform", "rotate(-90)" )
+
+            svg_x.append("g")
+              .attr("class", "y axis")
+              .call(yAxis_x)
+            .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 6)
+              .attr("dy", ".71em")
+              .style("text-anchor", "end")
+              .text("X Values");
+
+            svg_x.append("text")
+                    .attr("transform",
+                      "translate(" + (width/4) + " ," + 
+                                     (0) + ")")
+                    .style("text-anchor", "middle")
+                    .text("X VALUES")
+                    .attr("class","label");
+
+            svg_x.selectAll("bar")
+              .data(dataList_x)
+            .enter().append("rect")
+              .style("fill", "#4682B4")
+              .attr("x", function(d) { return x_x(d.rankIndex); })
+              .attr("width", 30)
+              .attr("y", function(d) { return y_x(d.value); })
+              .attr("height", function(d) { return height_x - y_x(d.value);})
+              .on("mouseover", function(d) {
+                    d3.select(this).style("fill", "#e41a1c");
+                    coordinatey(d.rankIndex, "#e41a1c");
+                })
+                .on("mouseout", function(d, i) {
+                    d3.select(this).style("fill","#4682B4");
+                    coordinatey(d.rankIndex, "#4682B4");
+                });
+
+
+
+            });
+        
+/*************************************************************BAR GRAPH FOR X VALUES************************************************************************/
+
+        var margin_y = {top:20, bottom:30, right:20, left:40}, width_y = 600 - margin_y.left - margin_y.right, 
+                height_y = 500 - margin_y.top - margin_y.bottom;
+        
+        var x_y = d3.scale.linear().range([0, width_y]);
+        
+        var y_y = d3.scale.linear().range([height_y, 0]);
+        
+        var dataList_y=[];
+        
+        var svg_y = d3.select("#ybargraph").append("svg:svg")
+        .attr("width", width_y + margin_y.left + margin_y.right)
+        .attr("height", height_y + margin_y.top + margin_y.bottom)
+        .append("g")
+        .attr("transform", 
+          "translate(" + margin_y.left + "," + margin_y.top + ")");
+        
+        d3.csv("data/anscombe_I.csv", function(data) {
+            var i = 1;
+            data.forEach( function (d) {
+                
+                var tempobject = {rankIndex: i, value: 0};
+                tempobject.value = parseInt(d.y);
+                dataList_y.push(tempobject);
+                i++;
+                
+            });
+            
+            
+            var xAxis_y = d3.svg.axis().scale(x_y).orient("bottom").ticks(10);
+            var yAxis_y = d3.svg.axis().scale(y_y).orient("left");
+            
+            x_y.domain([0, d3.max(dataList, function(d) { return d.rankIndex; })]);
+            y_y.domain([0, d3.max(dataList, function(d) { return d.value; })]);
+
+            
+            svg_y.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height_y + ")")
+              .call(xAxis_y)
+            .selectAll("text")
+              .style("text-anchor", "end")
+              .attr("dx", "-.8em")
+              .attr("dy", "-.55em")
+              .attr("transform", "rotate(-90)" )
+
+            svg_y.append("g")
+              .attr("class", "y axis")
+              .call(yAxis_y)
+            .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 6)
+              .attr("dy", ".71em")
+              .style("text-anchor", "end")
+              .text("Y Values");
+
+            svg_y.append("text")
+                    .attr("transform",
+                      "translate(" + (width/4) + " ," + 
+                                     (0) + ")")
+                    .style("text-anchor", "middle")
+                    .text("Y VALUES")
+                    .attr("class","label");
+
+            svg_y.selectAll("bar")
+              .data(dataList_y)
+            .enter().append("rect")
+              .style("fill", "#4682B4")
+              .attr("x", function(d) { return x_y(d.rankIndex); })
+              .attr("width", 30)
+              .attr("y", function(d) { return y_y(d.value); })
+              .attr("height", function(d) { return height_y - y_y(d.value);})
+              .on("mouseover", function(d) {
+                    d3.select(this).style("fill", "#e41a1c");
+                    coordinatex(d.rankIndex, "#e41a1c");
+                })
+                .on("mouseout", function(d, i) {
+                    d3.select(this).style("fill","#4682B4");
+                    coordinatex(d.rankIndex, "#4682B4");
+                });
+
+
+
+
+            });
+
+    
+    //Changing the color of the corresponding bar graphs either X and Y values
+        
+    function coordinatey(index, color)
+        {
+            svg_y.selectAll("rect").filter(function(d) { return d.rankIndex == index;}).style("fill", color);
+        }
+
+    function coordinatex(index, color)
+        {
+            svg_x.selectAll("rect").filter(function(d) { return d.rankIndex == index;}).style("fill", color);
+        }
+        
+        
+    //function to get the slope and points for the best line of fit in scatter plot    
+    function linearRegression_data(dataset) {
+        var x = [];
+        var y = [];
+        var x_mean = 0;
+        var y_mean = 0;
+        var m1 = 0;
+        var m2 = 0;
+        dataset.forEach( function(d) {x.push(parseFloat(d.x));
+                                     y.push(parseFloat(d.y));
+                                     });
+        
+        // create x and y values
+        for (var i = 0; i < dataset.length; i++) {
+            x_mean += x[i];
+            y_mean += y[i];
+        }
+        // calculate mean x and y
+        x_mean /= (dataset.length);
+        y_mean /= (dataset.length);
+
+        // calculate coefficients
+        var xr = 0;
+        var yr = 0;
+        for (i = 0; i < x.length; i++) {
+            xr = x[i] - x_mean;
+            yr = y[i] - y_mean;
+            m1 += xr * yr;
+            m2 += xr * xr;
+
+        }
+        var b1 = m1 / m2;
+        var b0 = y_mean - (b1 * x_mean);
+        // perform regression 
+
+        yslope = [];
+        // fit line using coeffs
+        for (i = 0; i < x.length; i++) {
+            yslope.push(b0 + (x[i] * b1));
+        }
+
+        var data = [];
+        for (i = 0; i < y.length; i++) {
+            data.push({
+                "yslope": yslope[i],
+                "y": y[i],
+                "x": x[i]
+            })
+        }
+        return (data);
+    }
+        
+    </script>
+</body>
+
+
+</html>

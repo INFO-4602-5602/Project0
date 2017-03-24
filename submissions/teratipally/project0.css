@@ -1,0 +1,174 @@
+body {
+    font-family: sans-serif;
+    font-size: 12px;
+    background-color: black;
+    color: white;
+}
+
+.line {
+    stroke: orange;
+    fill: orange;
+    color: orange;
+    stroke-width: 3;
+}
+
+svg text {
+    fill: white;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: orange;
+    shape-rendering: crispEdges;
+}
+
+
+h1 {
+  display: table;
+  white-space: nowrap;
+  border-spacing: 25px 0;
+  font-size: 'Open Sans Condensed', sans-serif;
+  font-size: 48px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: orange;
+}
+
+h1:before, h1:after {
+  content: "";
+  display: table-cell;
+  width: 50%;
+  background: -webkit-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -moz-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: -ms-linear-gradient(#aaa, #aaa) repeat-x left center;
+  background: linear-gradient(#aaa, #aaa) repeat-x left center;
+  background-size: 1px 1px;
+}
+
+
+
+.point {
+    fill: #f00; 
+    stroke: #fff;
+}
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.label {
+    text-anchor: left;
+    text-align: middle;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
+    color: orange;
+    
+}
+
+.title_lable {
+    text-anchor: left;
+    text-align: left;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: orange;
+}
+
+.
+
+div {
+    
+    font-size: 14;
+    line-height: 1.3em;
+    vertical-align: top;
+    margin-bottom: 1em;
+    border-radius: 0.5em;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.float{
+    float: left;
+}
+
+.half{
+    
+    width: 50%;
+}
+
+.comboboxDivspan{
+    
+    float: left;
+    font-size: 20px;
+    font-family: 'Miller Ban It';
+    font-weight: bold;
+    padding: 6px 12px 2px 12px;
+    color: orange;
+}
+    
+.selectCombobox {
+    
+    float: inherit;
+    font-size: 16px;
+    background-color: azure;
+    width: 200;
+    font-family: 'Miller Ban It';
+    
+}
+
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 2px;
+  color: orange;
+    
+}
+
+.styled-select {
+   background: url(http://i62.tinypic.com/15xvbd5.png) no-repeat 96% 0;
+   height: 29px;
+   overflow: hidden;
+   width: 240px;
+   font-size: 18px;
+}
+
+
+.styled-select select {
+   background: transparent;
+   border: none;
+   font-size: 16px;
+   height: 29px;
+   padding: 5px; /* If you add too much padding here, the options won't show in IE */
+   width: 268px;
+}
+
+
+.semi-square {
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   border-radius: 5px;
+   background-color: white;
+}
+
+.datacheckLabel{
+    
+    font-size: 16px;
+    text-align: left;
+    font-family: 'Kaushan Script';
+    font-weight: 400;
+    color: orange;
+}
+

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<head>
+<title>Project 0</title>
+<style type="text/css" href="project0.css"></style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+    
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+    
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+	</div>
+    
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+	
+	var dset_name = ["I","II","III","IV"];
+	dset_name.forEach(function(element){
+		d3.csv("./data/anscombe_"+element+".csv",function(dataset){
+			checkDataset(dataset);
+		});
+	});// use a double for loop to import csv and check the dataset.
+	
+        
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+      
+        // Put your part two code here ***********************
+        //Building Bars
+        var w = 600; // Width of our visualization
+        var h = 400; // Height of our visualization
+        var xOffset = 50; // Space for x-axis labels
+        var yOffset = 100; // Space for y-axis labels
+        var margin = 10; // Margin around visualization
+        var vals = ['x', 'y']; // List of data attributes
+        var xVal = vals[0]; // Value to plot on x-axis
+        var yVal = vals[1]; // Value to plot on y-axis
+        d3.csv('anscombe_I.csv', function(csvData) {
+            var dataset = csvData;
+        // Testing data for part 2 loaded correctly
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partTwo").append("<p>data loaded correctly</p>");
+            else
+                $("#partTwo").append("<p>data loaded incorrectly</p>");
+            }
+        checkDataset(dataset);
+            var xScale = d3.scale.linear()
+                            .domain([d3.min(dataset, function(d) {
+                                return parseFloat(d[xVal]);
+                            })-1, d3.max(dataset, function(d) {
+                                return parseFloat(d[xVal]);
+                            })+1])
+                            .range([xOffset + margin, w - margin]);
+            var yScale = d3.scale.linear()
+                            .domain([d3.min(dataset, function(d) {
+                                return parseFloat(d[yVal]);
+                            })-1, d3.max(dataset, function(d) {
+                                return parseFloat(d[yVal]);
+                            })+1])
+                            .range([h - yOffset - margin, margin]);
+            // Next, create an SVG element to contain our visualization.
+            var svg = d3.select("#partTwo").append("svg:svg")
+                                            .attr("width", w)
+                                            .attr("height", h);
+            // Build axes! (These are kind of annoying, actually...)
+            // Specify the axis scale and general position
+            var xAxis = d3.svg.axis()
+                              .scale(xScale)
+                              .orient("bottom")
+                              .ticks(5);
+            // Add a graphics element to hold the axis we created above (xAxis)
+            var xAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+                            .call(xAxis);
+            // Add a label that shows the user what that axis represents
+            var xLabel = svg.append("text")
+                            .attr('class', 'label')
+                            .attr('x', w/2)
+                            .attr('y', h - margin/2)
+                            .text(xVal);
+            // Repeat for the y-axis
+            var yAxis = d3.svg.axis()
+                              .scale(yScale)
+                              .orient("left")
+                              .ticks(5);
+            var yAxisG = svg.append('g')
+                            .attr('class', 'axis')
+                            .attr('transform', 'translate(' + xOffset + ', 0)')
+                            .call(yAxis);
+            var yLabel = svg.append("text")
+                            .attr('class', 'label')
+                            .attr('x', xOffset/2)
+                            .attr('y', h/2)
+                            .text(yVal);
+            // Now, we will start actually building our scatterplot!
+                // Select elements
+                // Bind data to elements
+            var point = svg.selectAll(".point")
+                            //THIS MIGHT BE PROBLEM, COME BACK TO
+                            .data(dataset);
+                // Create new elements if needed
+            point.enter().append("svg:rect");
+                // Update our selection
+            point.attr("class", "point")
+                .attr("x", function(d){return xScale(d[xVal])-20;})
+                .attr("y", function(d) {return yScale(d[yVal]);})
+                .attr("width", 40)
+                .attr("height", function(d) { return h - 100 - yScale(d[yVal]); });
+                    // Give it a class
+                    // x-coordinate
+                    // y-coordinate
+                    // radius
+                    // tooltip
+            point.append("scg:title")
+                .text(function(d){return d['Word'];});
+        });
+        // A function to retrieve the next value in the vals list
+        function getNextVal(val) {
+            return vals[(vals.indexOf(val) + 1) % vals.length];
+        };
+        // A function to change what values we plot on the x-axis
+        function setXval(val) {
+            // Update xVal
+            xVal = val;
+            // Update the axis
+            xScale.domain([d3.min(dataset, function(d) { return parseFloat(d[xVal]); })-1,
+                           d3.max(dataset, function(d) { return parseFloat(d[xVal]); })+1])
+            xAxis.scale(xScale);
+            xAxisG.call(xAxis);
+            xLabel.text(xVal);
+            // Update the points
+        };
+        // A function to change what values we plot on the y-axis
+        function setYval(val) {
+            // Update yVal
+            yVal = val;
+            // Update the axis
+            yScale.domain([d3.min(dataset, function(d) { return parseFloat(d[yVal]); })-1,
+                           d3.max(dataset, function(d) { return parseFloat(d[yVal]); })+1])
+            yAxis.scale(yScale);
+            yAxisG.call(yAxis);
+            yLabel.text(yVal);
+            // Update the points
+
+	// Put your part three & four code here ***********************
+     d3.csv('./data/anscombe_I.csv', function(data) {
+        var w = 600;
+        var h = 480;
+        var xlOff = 15; 
+        var ylOff = xlOff*.9;
+        var margin = 0;
+        var gap = 2;
+        var xScale = d3.scale.linear()
+            .domain([d3.min(data, function(d) {
+                return parseFloat(d.x);
+            })-gap, d3.max(data, function(d) {
+                return parseFloat(d.x);
+            })+gap])
+            .range([xlOff + margin, w - margin]);
+
+        var yScale = d3.scale.linear()
+            .domain([d3.min(data, function(d) {
+                return parseFloat(d.y);
+            })-gap, d3.max(data, function(d) {
+                return parseFloat(d.y);
+            })+gap])
+            .range([h - ylOff - margin, margin]);
+
+        // Build axes
+        var xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(10);
+        var yAxis = d3.svg.axis().scale(yScale).orient("left").ticks(10);
+        
+        var svgp3 = d3.select("#partThree").append("svg:svg");
+
+        svgp3.attr("width", w)
+            .attr("height", h);
+
+        svgp3.append('g')
+            .attr('class', 'xaxis')
+            .call(xAxis)
+            .attr('transform', 'translate(0, ' + (h - ylOff - margin - 5) + ')')
+            .attr('stroke-width', '2.0');
+        svgp3.append('g')
+            .attr('class', 'yaxis')
+            .call(yAxis)
+            .attr('transform', 'translate(' + (xlOff+margin+5) + ', 0)');
+
+        svgp3.append("text")
+            .attr('x', w/2)
+            .attr('y', h)
+            .text('x');
+
+        svgp3.append("text")
+            .attr('x', margin/2)
+            .attr('y', h/2)
+            .text('y');
+
+        // scatterplot
+        d3.select('#scatterLabel').text('No Selection');
+        svgp3.selectAll('.point')
+            .data(data)
+            .enter().append('svg:circle')
+            .attr('class', '.point')
+            .attr('cx', function(d) { return xScale(d.x); })
+            .attr('cy', function(d) { return yScale(d.y); })
+            .style('fill','red')
+            .attr('r', 0)
+            .transition()
+            .duration(500)
+            .attr('r', 5);
+
+        // part 4, hovering
+        d3.selectAll('circle').on('mouseover',function(){
+            d3.select(this).style('fill','blue');
+        }).on('mouseout',function(){ 
+            d3.select(this).transition().duration(100).style("fill","red");
+        }).on('mousedown',function(d){ 
+            d3.select('#scatterLabel').text('Clicked on: ('+ d.x+', '+d.y+')');
+        })
+})
+        
+        // Put your part five code here ***********************
+        function createScatterPlot(dataset,title){
+        var width = 500;
+        var height = 400;
+
+        d3.csv(dataset,function(csvData){
+        var ans2 = csvData;        
+        bestFit=lineofBestFit(ans2);
+            
+
+        yMin=0
+        yMax=d3.max(ans2,function(d,i){
+            return parseFloat(d['y']);
+        });
+
+
+        xMin=0
+        xMax=d3.max(ans2,function(d,i){
+            return parseFloat(d['x']);
+        });
+        xScale3 = d3.scale.linear().domain([xMin,xMax]).range([xOffset + margin, width - margin]);
+        yScale3 = d3.scale.linear().domain([yMin,yMax]).range([height-yOffset-margin,margin]);
+
+        var svg3 = d3.select("#scatterplotSet").append("svg:svg")
+                .attr("display","inline-block")
+                .attr("width", width)
+                .attr("height", height);
+        var x1=xMin;
+        var x2=xMax;
+        var y1=x1*bestFit[0]+bestFit[1];
+        var y2=x2*bestFit[0]+bestFit[1];
+
+        svg3.append("line")
+        .attr("x1",xScale3(x1))
+        .attr("x2",xScale3(x2))
+        .attr("y1",yScale3(y1))
+        .attr("y2",yScale3(y2))
+        .attr("stroke","grey")
+        .attr("stroke-width",2)
+        .style("stroke-dasharray",("10,3"));
+
+        var xAxis3 = d3.svg.axis()
+                    .scale(xScale3)
+                    .orient("bottom")
+                    .ticks(5);
+
+        var yAxis3 = d3.svg.axis()
+                    .scale(yScale3)
+                    .orient("left")
+                    .ticks(5)
+
+        var xAxisG3 = svg3.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(0, ' + (height - yOffset) + ')')
+                    .call(xAxis3);
+
+        var xLabel3 = svg3.append("text")
+                    .attr('class', 'label')
+                    .attr('x', width/2)
+                    .attr('y', height - yOffset/2)
+                    .text('X Values');
+
+        var yAxisG3 = svg3.append('g')
+                    .attr('class', 'axis')
+                    .attr('transform', 'translate(' + xOffset + ', 0)')
+                    .call(yAxis3);
+        var yLabel3 = svg3.append("text")
+                    .attr('class', 'label')
+                    .attr('x', -100)
+                    .attr('y', 50)
+                    .attr("transform","rotate(-90)")
+                    .style("text-anchor","middle")
+                    .text('Y Values');
+            
+
+        circles2 = svg3.selectAll(".point").data(ans2).enter().append("svg:circle");
+
+        circles2.attr('cx',function(d){
+                        return xScale3(d['x']);
+                    })
+                    .attr('cy',function(d){
+                        return yScale3(d['y']);
+                    })
+                    .attr('r',5)
+                .attr("class","point")
+
+        svg3.append('text')
+                .attr('x',width/2-15)
+                .attr('y',15)
+                .style("font-size","18")
+                .style("fill","black")                                  
+                .text(title);
+        });
+}
+
+function lineofBestFit(data){
+    var xmean = d3.mean(data,function(d){ return d['x'];});
+    var ymean = d3.mean(data,function(d){ return (d['y']);});
+    var top = d3.sum(data,function(d){
+                return ((d['x'])-xmean)*((d['y'])-ymean);
+            });
+    var bottom = d3.sum(data,function(d){
+                return ((d['x'])-xmean)*((d['x'])-xmean);
+            });
+    var m = top/bottom; //slope of line of best fit
+
+    //y-intercept
+    var b = ymean - m*xmean;
+    return [m,b];            
+}
+
+        
+};
+    </script>
+</body>
+
+
+</html>

@@ -1,0 +1,572 @@
+<html>
+<head>
+<title>Project 0</title>
+<link rel="stylesheet" type="text/css" href="project0.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+    <div id="partOne">
+        <h1>Part One:</h1>
+    </div>
+    <div id="partTwo">
+        <h1>Part Two:</h1>
+        <div id="barchart"></div>
+    </div>
+    <div id="partThree">
+        <h1>Part Three & Four:</h1>
+        <div id="scatterplot">
+            <select id="dSelect" onchange="plot_data()">
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
+            </select>
+            <p id="scatterLabel"></p>
+        </div>
+    </div>
+    <div id="partFive">
+        <h1>Part Five:</h1>
+        <div id="scatterplotSet">
+            <div id="plotI" class="cell"></div>
+            <div id="plotII" class="cell"></div>
+            <div id="plotIII" class="cell"></div>
+            <div id="plotIV" class="cell"></div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        var w = 700;// Width of our visualization
+        var h = 500;// Height of our visualization
+        var xOffSet = 80;// Space for y-axis labels
+        var yOffSet = 80;// Space for x-axis labels
+        var margin=10;
+        // Put your part one code here ***********************
+
+        ["./data/anscombe_I.csv","./data/anscombe_II.csv","./data/anscombe_III.csv","./data/anscombe_IV.csv"].map(function (e) {
+            d3.csv(e, function (cData) {
+                var anscombe = cData;
+                checkDataset(anscombe)
+            });
+        });
+
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+
+        // Put your part two code here ***********************
+
+        d3.csv("./data/anscombe_I.csv", function(cData){
+            var anscombe1 = cData;
+
+            var xScale = d3.scale.linear()
+                .domain([0, anscombe1.length])
+                .range([xOffSet+margin,w-margin]);
+
+            var xScale2 = d3.scale.linear()
+                .domain([0, anscombe1.length])
+                .range([xOffSet+margin,w-margin]);
+
+            var yScale = d3.scale.linear()
+                .domain([d3.min(anscombe1,function(d){
+                    return parseFloat(d["x"]);
+                })-1,d3.max(anscombe1,function (d) {
+                    return parseFloat(d["x"]);
+                })+1])
+                .range([h-yOffSet-margin,margin]);
+
+            var yScale2 = d3.scale.linear()
+                .domain([d3.min(anscombe1,function(d){
+                    return parseFloat(d["y"]);
+                })-1,d3.max(anscombe1,function (d) {
+                    return parseFloat(d["y"]);
+                })+1])
+                .range([h-yOffSet-margin,margin]);
+
+            var svg = d3.select("#partTwo").append("svg:svg")
+                .attr("width",w)
+                .attr("height",h);
+
+            var svg2 = d3.select("#partTwo").append("svg:svg")
+                .attr("width",w)
+                .attr("height",h);
+
+            var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(5);
+
+            var xAxis2 = d3.svg.axis()
+                .scale(xScale2)
+                .orient("bottom")
+                .ticks(5);
+
+            var xAxisG = svg.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(0," + (h-yOffSet) +")")
+                .call(xAxis);
+
+            var xAxisG2 = svg2.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(0," + (h-yOffSet) +")")
+                .call(xAxis2);
+
+            var xLabel = svg.append("text")
+                .attr("class","label")
+                .attr("x",w/2)
+                .attr("y",h-yOffSet/2)
+                .text("x in natural order");
+
+            var xLabel2 = svg2.append("text")
+                .attr("class","label")
+                .attr("x",w/2)
+                .attr("y",h-yOffSet/2)
+                .text("y in natural order");
+
+
+            var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left")
+                .ticks(5);
+
+            var yAxis2 = d3.svg.axis()
+                .scale(yScale2)
+                .orient("left")
+                .ticks(5);
+
+            svg.selectAll("rect")
+                .data(anscombe1)
+                .enter()
+                .append("rect")
+                .style("fill","red")
+                .attr("class",function(d){
+                    return "R"+anscombe1.indexOf(d);
+                })
+                .attr("x",function (d) {
+                    return xScale(anscombe1.indexOf(d));
+                })
+                .attr("width",12)
+                .attr("y",function(d){
+                    return yScale(parseFloat(d["x"]));
+                })
+                .attr("height",function (d) {
+                    return h-yOffSet-yScale(parseFloat(d["x"]));
+                })
+                .on("mouseover",function (d) {
+                    var id = "R"+anscombe1.indexOf(d);
+                    d3.selectAll("."+id)
+                        .style("fill","blue")
+                        .attr("width",15);
+                })
+                .on("mouseout",function (d) {
+                    var id = "R"+anscombe1.indexOf(d);
+                    d3.selectAll("."+id)
+                        .style("fill","red")
+                        .attr("width",12);
+                });
+
+            svg2.selectAll("rect")
+                .data(anscombe1)
+                .enter()
+                .append("rect")
+                .style("fill","red")
+                .attr("class",function(d){
+                    return "R"+anscombe1.indexOf(d);
+                })
+                .attr("x",function (d) {
+                    return xScale(anscombe1.indexOf(d));
+                })
+                .attr("width",12)
+                .attr("y",function(d){
+                    return yScale(parseFloat(d["y"]));
+                })
+                .attr("height",function (d) {
+                    return h-yOffSet-yScale(parseFloat(d["y"]));
+                }).on("mouseover",function (d) {
+                var id = "R"+anscombe1.indexOf(d);
+                d3.selectAll("."+id)
+                    .style("fill","blue")
+                    .attr("width",15);
+            })
+                .on("mouseout",function (d) {
+                    var id = "R"+anscombe1.indexOf(d);
+                    d3.selectAll("."+id)
+                        .style("fill","red")
+                        .attr("width",12);
+                });
+
+            var yAxisG = svg.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(" + xOffSet +",0)")
+                .call(yAxis);
+
+            var yAxisG2 = svg2.append("g")
+                .attr("class","axis")
+                .attr("transform","translate(" + xOffSet +",0)")
+                .call(yAxis2);
+
+            var yLabel = svg.append("text")
+                .attr("class","label")
+                .attr("x",xOffSet/2)
+                .attr("y",h/3)
+                .text("x");
+
+            var yLabel2 = svg2.append("text")
+                .attr("class","label")
+                .attr("x",xOffSet/2)
+                .attr("y",h/3)
+                .text("y");
+
+        });
+
+
+        // Put your part three & four code here ***********************
+
+        function compute_line_params(data, xScale, yScale){
+            sx = data.reduce( (a,b) => a = a + xScale(+b["x"]),0);
+            sy = data.reduce( (a,b) => a = a + yScale(+b["y"]),0);
+            mx = sx/data.length;
+            my = sy/data.length;
+            nr = data.reduce( (a,b) => a = a + ((xScale(+b["x"])-mx)*(yScale(+b["y"])-my)),0);
+            dr = data.reduce( (a,b) => a = a + (xScale(+b["x"])-mx)*(xScale(+b["x"])-mx),0);
+            slope = nr/dr;
+            b = my - (slope*mx);
+            return [b,slope];
+        }
+
+        function plot_data(){
+
+            var opt = document.getElementById("dSelect");
+
+            var dataset = opt.value;
+
+            d3.csv("./data/anscombe_" + dataset + ".csv", function (cData) {
+                var anscombe1 = cData;
+                var svg = d3.select("#partThree");
+
+                var yScale = d3.scale.linear()
+                    .domain([d3.min(anscombe1, function (d) {
+                        return parseFloat(d["y"]);
+                    }) - 1, d3.max(anscombe1, function (d) {
+                        return parseFloat(d["y"]);
+                    }) + 1])
+                    .range([h - yOffSet - margin, margin]);
+
+
+                var xScale = d3.scale.linear()
+                    .domain([d3.min(anscombe1, function (d) {
+                        return parseFloat(d["x"]);
+                    }) - 1, d3.max(anscombe1, function (d) {
+                        return parseFloat(d["x"]);
+                    }) + 1])
+                    .range([xOffSet + margin, w - margin]);
+
+                var xAxis = d3.svg.axis()
+                    .scale(xScale)
+                    .orient("bottom")
+                    .ticks(5);
+
+                var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left")
+                    .ticks(5);
+
+                var xAxisG = svg.select("#x-axis")
+                    .transition()
+                    .duration(750)
+                    .attr("class", "axis")
+                    .attr("transform", "translate(0," + (h - yOffSet) + ")")
+                    .call(xAxis);
+
+                var yAxisG = svg.select("#y-axis")
+                    .transition()
+                    .duration(750)
+                    .attr("id","y-axis")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(" + xOffSet + ",0)")
+                    .call(yAxis);
+
+                svg.selectAll(".point")
+                    .data(anscombe1)
+                    .transition()
+                    .duration(750)
+                    .attr("class", "point")
+                    .attr("cx", function (d) {
+                        return xScale(parseFloat(d["x"]));
+                    })
+                    .attr("cy", function (d) {
+                        return yScale(parseFloat(d["y"]));
+                    })
+                    .attr("r", 3.5);
+
+                var lParams = compute_line_params(anscombe1, xScale, yScale);
+
+                var d = [];
+                var dmin = d3.min(anscombe1, function (d) {
+                    return parseFloat(d["x"])
+                });
+                var dmax = d3.max(anscombe1, function (d) {
+                    return parseFloat(d["x"])
+                });
+                d[0] = xScale(dmin - 1);
+                d[1] = lParams[1] * xScale(dmin - 1) + lParams[0];
+                d[2] = xScale(dmax + 1);
+                d[3] = lParams[1] * xScale(dmax + 1) + lParams[0];
+
+                svg.selectAll(".trend")
+                    .data(d)
+                    .transition()
+                    .duration(750)
+                    .attr("class", "trend")
+                    .attr("x1", d[0])
+                    .attr("y1", d[1])
+                    .attr("x2", d[2])
+                    .attr("y2", d[3]);
+            });
+
+        }
+
+        d3.csv("./data/anscombe_I.csv", function (cData) {
+            var anscombe1 = cData;
+
+            var yScale = d3.scale.linear()
+                .domain([d3.min(anscombe1, function (d) {
+                    return parseFloat(d["y"]);
+                }) - 1, d3.max(anscombe1, function (d) {
+                    return parseFloat(d["y"]);
+                }) + 1])
+                .range([h - yOffSet - margin, margin]);
+
+            var toolTipDiv = d3.select("#partThree")
+                .append("div")
+                .attr("class", "tooltip");
+
+            var xScale = d3.scale.linear()
+                .domain([d3.min(anscombe1, function (d) {
+                    return parseFloat(d["x"]);
+                }) - 1, d3.max(anscombe1, function (d) {
+                    return parseFloat(d["x"]);
+                }) + 1])
+                .range([xOffSet + margin, w - margin]);
+
+
+            var svg = d3.select("#partThree")
+                .append("svg:svg")
+                .attr("width", w)
+                .attr("height", h);
+
+            var lParams = compute_line_params(anscombe1, xScale, yScale);
+
+            var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(5);
+
+            var xAxisG = svg.append("g")
+                .transition()
+                .duration(750)
+                .attr("id","x-axis")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + (h - yOffSet) + ")")
+                .call(xAxis);
+
+            var xLabel = svg.append("text")
+                .attr("class", "label")
+                .attr("x", w / 2)
+                .attr("y", h - yOffSet / 2)
+                .text("x");
+
+            svg.selectAll(".point")
+                .data(anscombe1)
+                .enter()
+                .append("circle")
+                .attr("class", "point")
+                .attr("cx", function (d) {
+                    return xScale(parseFloat(d["x"]));
+                })
+                .attr("cy", function (d) {
+                    return yScale(parseFloat(d["y"]));
+                })
+                .on("mouseover", function (d) {
+                    d3.select(this)
+                        .attr("r", 4)
+                        .style("fill", "blue");
+                    toolTipDiv.transition()
+                        .duration(2000)
+                        .style("opacity", 0.9)
+                        .style("left", (d3.event.pageX - 50) + "px")
+                        .style("top", (d3.event.pageY - 50) + "px");
+
+                    toolTipDiv.html("<p>(x: " + d["x"] + ",y: " + d["y"] + ")</p>");
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this)
+                        .attr("r", 3.5)
+                        .style("fill", "red");
+                    toolTipDiv.transition()
+                        .duration(2000)
+                        .style("opacity", 0);
+                })
+                .on("click", function (d) {
+                    d3.select("#scatterLabel")
+                        .text(("(" + d["x"] + "," + d["y"] + ")"));
+                })
+                .style("opacity", "0")
+                .transition()
+                .duration(750)
+                .style("opacity", "1")
+                .attr("r", 3.5);
+
+            var d = [];
+            var dmin = d3.min(anscombe1, function (d) {
+                return parseFloat(d["x"])
+            });
+            var dmax = d3.max(anscombe1, function (d) {
+                return parseFloat(d["x"])
+            });
+            d[0] = xScale(dmin - 1);
+            d[1] = lParams[1] * xScale(dmin - 1) + lParams[0];
+            d[2] = xScale(dmax + 1);
+            d[3] = lParams[1] * xScale(dmax + 1) + lParams[0];
+
+            svg.selectAll(".trend")
+                .data(d)
+                .enter()
+                .append("line")
+                .attr("opacity", "0")
+                .attr("class", "trend")
+                .attr("x1", d[0])
+                .attr("y1", d[1])
+                .attr("x2", d[2])
+                .attr("y2", d[3])
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .transition()
+                .duration(750)
+                .attr("opacity", "0.2");
+
+            var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left")
+                .ticks(5);
+
+            var yAxisG = svg.append("g")
+                .transition()
+                .duration(750)
+                .attr("id","y-axis")
+                .attr("class", "axis")
+                .attr("transform", "translate(" + xOffSet + ",0)")
+                .call(yAxis);
+
+            var yLabel = svg.append("text")
+                .attr("class", "label")
+                .attr("x", xOffSet / 2)
+                .attr("y", h / 3)
+                .text("y");
+
+        });
+
+        // Put your part five code here ***********************
+
+        ["./data/anscombe_I.csv","./data/anscombe_II.csv","./data/anscombe_III.csv","./data/anscombe_IV.csv"].map(function (e) {
+
+            d3.csv(e, function (cData) {
+                var anscombe = cData;
+                var xScale = d3.scale.linear()
+                    .domain([d3.min(anscombe, function (d) {
+                        return parseFloat(d["x"]);
+                    })-1, d3.max(anscombe,function (d) {
+                        return parseFloat(d["x"]);
+                    })+1])
+                    .range([xOffSet+margin,w-margin]);
+
+                var yScale = d3.scale.linear()
+                    .domain([d3.min(anscombe,function(d){
+                        return parseFloat(d["y"]);
+                    })-1,d3.max(anscombe,function (d) {
+                        return parseFloat(d["y"]);
+                    })+1])
+                    .range([h-yOffSet-margin,margin]);
+
+                var splitStr = e.split("_");
+                var splitStr2 = splitStr[1].split(".");
+
+                var svg = d3.select("#plot"+splitStr2[0]).append("svg:svg")
+                    .attr("width",w)
+                    .attr("height",h);
+
+                svg.append("text")
+                    .attr("x",w/2)
+                    .attr("y",margin+10)
+                    .attr("text-anchor", "middle")
+                    .style("font-size","20px")
+                    .text("Anscombe_" + splitStr2[0]);
+
+                var xAxis = d3.svg.axis()
+                    .scale(xScale)
+                    .orient("bottom")
+                    .ticks(5);
+
+                var xAxisG = svg.append("g")
+                    .attr("class","axis")
+                    .attr("transform","translate(0," + (h-yOffSet) +")")
+                    .call(xAxis);
+
+                var xLabel = svg.append("text")
+                    .attr("class","label")
+                    .attr("x",w/2)
+                    .attr("y",h-yOffSet/2)
+                    .text("x");
+
+                svg.selectAll(".point")
+                    .data(anscombe)
+                    .enter()
+                    .append("circle")
+                    .attr("class","point")
+                    .attr("cx",function (d) {
+                        return xScale(parseFloat(d["x"]));
+                    })
+                    .attr("cy",function(d){
+                        return yScale(parseFloat(d["y"]));
+                    })
+                    .on("mouseover",function (d) {
+                        d3.select(this)
+                            .attr("r",4)
+                            .style("fill","blue");
+                    })
+                    .on("mouseout",function (d) {
+                        d3.select(this)
+                            .attr("r",3.5)
+                            .style("fill","red");
+                    })
+                    .attr("r",3.5);
+
+                var yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left")
+                    .ticks(5);
+
+                var yAxisG = svg.append("g")
+                    .attr("class","axis")
+                    .attr("transform","translate(" + xOffSet +",0)")
+                    .call(yAxis);
+
+                var yLabel = svg.append("text")
+                    .attr("class","label")
+                    .attr("x",xOffSet/2)
+                    .attr("y",h/3)
+                    .text("y");
+            });
+        });
+    </script>
+</body>
+
+
+</html>

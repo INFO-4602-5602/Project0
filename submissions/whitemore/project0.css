@@ -1,0 +1,28 @@
+body {
+    font-family: sans-serif;
+    font-size: 20px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.point {
+    fill: #000; 
+    stroke: #000;
+}
+
+
+.bar {
+  fill: #000;
+}
+
+.label {
+    text-anchor: middle;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}

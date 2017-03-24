@@ -1,0 +1,648 @@
+<html>
+<head>
+<title>Project 0</title>
+<link rel="stylesheet" type="text/css" href="project0.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <h4>Note: crispEdges bugged</h4>
+        <div id="barchart">
+        </div>
+	</div>
+
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <h4>Note: crispEdges bugged, tooltips, hover-color, onclick enabled</h4>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <h4>Note: changing the size of SVG's to allow for a side-by-side chart view changes all SVG's on the page due to the asynchronicity of d3.</h4>
+        <h4>So the charts are huge but atleast they're side by side on my giant monitor.</h4>
+        <div class="container" id="chart1">
+        </div>
+        <div class="container" id="chart2">
+        </div>
+        <div class="container" id="chart3">
+        </div>
+        <div class="container" id="chart4">
+        </div>
+	</div>
+
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+
+        /* d3 is asynchronous, outside functions and logs must be run inside d3 scope in order to avoid scoping issues concerning empty datasets */
+
+        var dataset1 = []
+        var dataset2 = []
+        var dataset3 = []
+        var dataset4 = []
+
+        d3.csv("/data/anscombe_I.csv", function(data) {
+           dataset1 = data.map(function(d) { return [ +d["x"], +d["y"] ]; });
+           checkDataset("dataset1", dataset1);
+        });
+        d3.csv("/data/anscombe_I.csv", function(data) {
+           dataset2 = data.map(function(d) { return [ +d["x"], +d["y"] ]; });
+           checkDataset("dataset2", dataset2);
+        });
+        d3.csv("/data/anscombe_I.csv", function(data) {
+           dataset3 = data.map(function(d) { return [ +d["x"], +d["y"] ]; });
+           checkDataset("dataset3", dataset3);
+        });
+        d3.csv("/data/anscombe_I.csv", function(data) {
+           dataset4 = data.map(function(d) { return [ +d["x"], +d["y"] ]; });
+           checkDataset("dataset4", dataset4);
+        });
+
+        function checkDataset(name, dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>"+name+" loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+
+        // Put your part two code here ***********************
+
+        //d3 margin convention
+        var margin = {top: 20, right: 10, bottom: 100, left: 40},
+            width = 700 - margin.right - margin.left,
+            height = 700 - margin.right - margin.left;
+
+        //define svg, graph area, g used for grouping elements
+        var svgBarChart = d3.select('#barchart')
+            .append('svg')
+            .attr ({
+              'width' : width + margin.right + margin.left,
+              'height' : height + margin.top + margin .bottom
+            })
+            .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+
+        //define the x,y scales
+        var xScale = d3.scale.ordinal()
+            .rangeRoundBands([0,width], 0.3, 0.3);
+
+        var yScale = d3.scale.linear()
+            .range([height, 0]);
+
+        //define axis
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient("bottom");
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+
+        //import data again
+        d3.csv("/data/anscombe_I.csv", function(data) {
+
+          //convert string numbers to ints
+          data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+          });
+
+          //sort data descending
+          data.sort(function(a,b) {
+            return b.y - a.y;
+          });
+
+          xScale.domain(data.map(function(d) { return d.x; }) );
+          yScale.domain([0, d3.max(data, function(d) { return d.y; })] );
+
+          //draw the bars
+          svgBarChart.selectAll('rect')
+              .data(data)
+              .enter()
+              .append('rect')
+              .attr("height", 0)
+              .attr("y", height)
+              .transition().duration(3000)
+              .delay(function(d,i) { return i * 200; })
+              .attr({
+                  'x': function(d) { return xScale(d.x); },
+                  'y': function(d) { return yScale(d.y); },
+                  "width": xScale.rangeBand(),
+                  "height": function(d) { return height - yScale(d.y); }
+              })
+              .style("fill", function(d,i) { return 'rgb(20, 20, ' + ((i * 30) + 100) + ')' });
+
+          //label the bars
+          svgBarChart.selectAll('text')
+              .data(data)
+              .enter()
+              .append('text')
+              .text(function(d) { return d.y; })
+              .attr('x', function(d) { return xScale(d.x) + xScale.rangeBand()/2; })
+              .attr('y', function(d) { return yScale(d.y) + 12; })
+              .style("fill", "white")
+              .style("text-anchor", "middle");
+
+          //draw x,y axis
+          svgBarChart.append('g')
+              .attr("class", "x-axis")
+              .attr('transform', 'translate(0,' + height + ')')
+              .call(xAxis)
+
+          svgBarChart.append('g')
+              .attr("class", "y-axis")
+              .call(yAxis)
+
+          //graph lebels
+          svgBarChart.append("text")
+              .attr("x", 300)
+              .attr("y", 700)
+              .style("text-anchor", "middle")
+              .text("X");
+
+          svgBarChart.append("text")
+              .attr("x", -35)
+              .attr("y", 300)
+              .style("text-anchor", "middle")
+              .text("Y");
+
+          svgBarChart.append("text")
+              .attr("x", 350)
+              .attr("y", 20)
+              .style("text-anchor", "middle")
+              .text("X vs. Y Barchart anscombe_I");
+
+        });
+        // Put your part three & four code here ***********************
+
+        //marings, scales, and axis's previously defined
+
+        // add the tooltip area to the webpage
+        var tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        //define svg, graph area, g used for grouping elements
+        var svgScatterPlot = d3.select('#scatterplot')
+            .append('svg')
+            .attr ({
+              'width' : width + margin.right + margin.left,
+              'height' : height + margin.top + margin .bottom
+            })
+            .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+
+
+        //import data again
+        d3.csv("/data/anscombe_I.csv", function(data) {
+
+          //convert string numbers to ints
+          data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+          });
+
+          //sort data descending
+          data.sort(function(a,b) {
+            return b.y - a.y;
+          });
+
+          xScale.domain(data.map(function(d) { return d.x; }) );
+          yScale.domain([0, d3.max(data, function(d) { return d.y; })] );
+
+          // draw dots
+          svgScatterPlot.selectAll(".dot")
+              .data(data)
+              .enter().append("circle")
+              .attr("class", "dot")
+              .attr("r", 3.5)
+              .attr({
+                  'cx': function(d) { return xScale(d.x); },
+                  'cy': function(d) { return yScale(d.y); }
+              })
+              .on("mouseover", function(d) {
+                  tooltip.transition()
+                       .duration(200)
+                       .style("opacity", .9);
+                  tooltip.html("(x,y)" + "<br/> (" + d.x
+        	        + ", " + d.y + ")")
+                       .style("left", (d3.event.pageX + 5) + "px")
+                       .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                  tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              })
+              .on ("click", function(d) {
+                var p = document.getElementById("scatterLabel");
+                p.innerHTML = "x: " + d.x + " y: " + d.y;
+              });
+
+          //draw x,y axis
+          svgScatterPlot.append('g')
+              .attr("class", "x-axis")
+              .attr('transform', 'translate(0,' + height + ')')
+              .call(xAxis)
+
+          svgScatterPlot.append('g')
+              .attr("class", "y-axis")
+              .call(yAxis)
+
+          //graph lebels
+          svgScatterPlot.append("text")
+              .attr("x", 300)
+              .attr("y", 700)
+              .style("text-anchor", "middle")
+              .text("X");
+
+          svgScatterPlot.append("text")
+              .attr("x", -35)
+              .attr("y", 300)
+              .style("text-anchor", "middle")
+              .text("Y");
+
+          svgScatterPlot.append("text")
+              .attr("x", 350)
+              .attr("y", 20)
+              .style("text-anchor", "middle")
+              .text("X vs. Y Scatterplot anscombe_I");
+
+        });
+
+        // Put your part five code here ***********************
+
+        /*Chart1*************************
+        *********************************
+        *********************************
+        */
+
+        //define svg, graph area, g used for grouping elements
+        var chart1 = d3.select('#chart1')
+            .append('svg')
+            .attr ({
+              'width' : width + margin.right + margin.left,
+              'height' : height + margin.top + margin .bottom
+            })
+            .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+
+        //import data again
+        d3.csv("/data/anscombe_I.csv", function(data) {
+
+          //convert string numbers to ints
+          data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+          });
+
+          //sort data descending
+          data.sort(function(a,b) {
+            return b.y - a.y;
+          });
+
+          xScale.domain(data.map(function(d) { return d.x; }) );
+          yScale.domain([0, d3.max(data, function(d) { return d.y; })] );
+
+          // draw dots
+          chart1.selectAll(".dot")
+              .data(data)
+              .enter().append("circle")
+              .attr("class", "dot")
+              .attr("r", 3.5)
+              .attr({
+                  'cx': function(d) { return xScale(d.x); },
+                  'cy': function(d) { return yScale(d.y); }
+              })
+              .on("mouseover", function(d) {
+                  tooltip.transition()
+                       .duration(200)
+                       .style("opacity", .9);
+                  tooltip.html("(x,y)" + "<br/> (" + d.x
+                  + ", " + d.y + ")")
+                       .style("left", (d3.event.pageX + 5) + "px")
+                       .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                  tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              });
+
+          //draw x,y axis
+          chart1.append('g')
+              .attr("class", "x-axis")
+              .attr('transform', 'translate(0,' + height + ')')
+              .call(xAxis)
+
+          chart1.append('g')
+              .attr("class", "y-axis")
+              .call(yAxis)
+
+          //graph lebels
+          chart1.append("text")
+              .attr("x", 300)
+              .attr("y", 700)
+              .style("text-anchor", "middle")
+              .text("X");
+
+          chart1.append("text")
+              .attr("x", -35)
+              .attr("y", 300)
+              .style("text-anchor", "middle")
+              .text("Y");
+
+          chart1.append("text")
+              .attr("x", 350)
+              .attr("y", 20)
+              .style("text-anchor", "middle")
+              .text("X vs. Y Scatterplot1 anscombe_I");
+
+        });
+
+        /*Chart2*************************
+        *********************************
+        *********************************
+        */
+
+        //marings, scales, axis's, and tooltips previously defined
+
+        //define svg, graph area, g used for grouping elements
+        var chart2 = d3.select('#chart2')
+            .append('svg')
+            .attr ({
+              'width' : width + margin.right + margin.left,
+              'height' : height + margin.top + margin .bottom
+            })
+            .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+
+        //import data again
+        d3.csv("/data/anscombe_II.csv", function(data) {
+
+          //convert string numbers to ints
+          data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+          });
+
+          //sort data descending
+          data.sort(function(a,b) {
+            return b.y - a.y;
+          });
+
+          xScale.domain(data.map(function(d) { return d.x; }) );
+          yScale.domain([0, d3.max(data, function(d) { return d.y; })] );
+
+          // draw dots
+          chart2.selectAll(".dot")
+              .data(data)
+              .enter().append("circle")
+              .attr("class", "dot")
+              .attr("r", 3.5)
+              .attr({
+                  'cx': function(d) { return xScale(d.x); },
+                  'cy': function(d) { return yScale(d.y); }
+              })
+              .on("mouseover", function(d) {
+                  tooltip.transition()
+                       .duration(200)
+                       .style("opacity", .9);
+                  tooltip.html("(x,y)" + "<br/> (" + d.x
+                  + ", " + d.y + ")")
+                       .style("left", (d3.event.pageX + 5) + "px")
+                       .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                  tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              });
+
+          //draw x,y axis
+          chart2.append('g')
+              .attr("class", "x-axis")
+              .attr('transform', 'translate(0,' + height + ')')
+              .call(xAxis)
+
+          chart2.append('g')
+              .attr("class", "y-axis")
+              .call(yAxis)
+
+          //graph lebels
+          chart2.append("text")
+              .attr("x", 300)
+              .attr("y", 700)
+              .style("text-anchor", "middle")
+              .text("X");
+
+          chart2.append("text")
+              .attr("x", -35)
+              .attr("y", 300)
+              .style("text-anchor", "middle")
+              .text("Y");
+
+          chart2.append("text")
+              .attr("x", 350)
+              .attr("y", 20)
+              .style("text-anchor", "middle")
+              .text("X vs. Y Scatterplot2 anscombe_II");
+
+        });
+
+        /*Chart3*************************
+        *********************************
+        *********************************
+        */
+
+        //marings, scales, axis's, and tooltips previously defined
+
+        //define svg, graph area, g used for grouping elements
+        var chart3 = d3.select('#chart3')
+            .append('svg')
+            .attr ({
+              'width' : width + margin.right + margin.left,
+              'height' : height + margin.top + margin .bottom
+            })
+            .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+
+        //import data again
+        d3.csv("/data/anscombe_III.csv", function(data) {
+
+          //convert string numbers to ints
+          data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+          });
+
+          //sort data descending
+          data.sort(function(a,b) {
+            return b.y - a.y;
+          });
+
+          xScale.domain(data.map(function(d) { return d.x; }) );
+          yScale.domain([0, d3.max(data, function(d) { return d.y; })] );
+
+          // draw dots
+          chart3.selectAll(".dot")
+              .data(data)
+              .enter().append("circle")
+              .attr("class", "dot")
+              .attr("r", 3.5)
+              .attr({
+                  'cx': function(d) { return xScale(d.x); },
+                  'cy': function(d) { return yScale(d.y); }
+              })
+              .on("mouseover", function(d) {
+                  tooltip.transition()
+                       .duration(200)
+                       .style("opacity", .9);
+                  tooltip.html("(x,y)" + "<br/> (" + d.x
+                  + ", " + d.y + ")")
+                       .style("left", (d3.event.pageX + 5) + "px")
+                       .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                  tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              });
+
+          //draw x,y axis
+          chart3.append('g')
+              .attr("class", "x-axis")
+              .attr('transform', 'translate(0,' + height + ')')
+              .call(xAxis)
+
+          chart3.append('g')
+              .attr("class", "y-axis")
+              .call(yAxis)
+
+          //graph lebels
+          chart3.append("text")
+              .attr("x", 300)
+              .attr("y", 700)
+              .style("text-anchor", "middle")
+              .text("X");
+
+          chart3.append("text")
+              .attr("x", -35)
+              .attr("y", 300)
+              .style("text-anchor", "middle")
+              .text("Y");
+
+          chart3.append("text")
+              .attr("x", 350)
+              .attr("y", 20)
+              .style("text-anchor", "middle")
+              .text("X vs. Y Scatterplot3 anscombe_III");
+
+        });
+
+        /*Chart4*************************
+        *********************************
+        *********************************
+        */
+
+        //marings, scales, axis's, and tooltips previously defined
+
+        //define svg, graph area, g used for grouping elements
+        var chart4 = d3.select('#chart4')
+            .append('svg')
+            .attr ({
+              'width' : width + margin.right + margin.left,
+              'height' : height + margin.top + margin .bottom
+            })
+            .append('g')
+                .attr('transform', 'translate(' + margin.left + ',' + margin.right + ')')
+
+        //import data
+        d3.csv("/data/anscombe_IV.csv", function(data) {
+
+          //convert string numbers to ints
+          data.forEach(function(d) {
+            d.x = +d.x;
+            d.y = +d.y;
+          });
+
+          //sort data descending
+          data.sort(function(a,b) {
+            return b.y - a.y;
+          });
+
+          xScale.domain(data.map(function(d) { return d.x; }) );
+          yScale.domain([0, d3.max(data, function(d) { return d.y; })] );
+
+          // draw dots
+          chart4.selectAll(".dot")
+              .data(data)
+              .enter().append("circle")
+              .attr("class", "dot")
+              .attr("r", 3.5)
+              .attr({
+                  'cx': function(d) { return xScale(d.x); },
+                  'cy': function(d) { return yScale(d.y); }
+              })
+              .on("mouseover", function(d) {
+                  tooltip.transition()
+                       .duration(200)
+                       .style("opacity", .9);
+                  tooltip.html("(x,y)" + "<br/> (" + d.x
+                  + ", " + d.y + ")")
+                       .style("left", (d3.event.pageX + 5) + "px")
+                       .style("top", (d3.event.pageY - 28) + "px");
+              })
+              .on("mouseout", function(d) {
+                  tooltip.transition()
+                       .duration(500)
+                       .style("opacity", 0);
+              });
+
+          //draw x,y axis
+          chart4.append('g')
+              .attr("class", "x-axis")
+              .attr('transform', 'translate(0,' + height + ')')
+              .call(xAxis)
+
+          chart4.append('g')
+              .attr("class", "y-axis")
+              .call(yAxis)
+
+          //graph lebels
+          chart4.append("text")
+              .attr("x", 300)
+              .attr("y", 700)
+              .style("text-anchor", "middle")
+              .text("X");
+
+          chart4.append("text")
+              .attr("x", -35)
+              .attr("y", 300)
+              .style("text-anchor", "middle")
+              .text("Y");
+
+          chart4.append("text")
+              .attr("x", 350)
+              .attr("y", 20)
+              .style("text-anchor", "middle")
+              .text("X vs. Y Scatterplot4 anscombe_IV");
+
+        });
+
+    </script>
+</body>
+
+
+</html>

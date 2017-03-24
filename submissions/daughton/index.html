@@ -1,0 +1,396 @@
+<html>
+<head>
+<style type="text/css">
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 11px;
+    background-color: #EDF4F5;
+}
+
+h1{
+    font-size: 36 px;
+    color: #EADFF0;
+    text-align: center;
+    background-color: #355681;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.point {
+    fill: #f00;
+    stroke: #000;
+}
+
+.label {
+    text-anchor: middle;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* this helps with adding the tooltip*/
+.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 80px;
+  height: 20px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+}
+</style>
+
+<title>Project 0</title>
+<style type="text/css" href="project0.css"></style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="barchart">
+        </div>
+	</div>
+
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="scatterplot">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+
+    <div id="partFour">
+        <h1>Part Three &amp; Four (B): </h1>
+            <select id = "scatterplotMenu">
+               <option value="">-----</option>
+               <option value="anscombe_I">Anscombe I</option>
+               <option value="anscombe_II">Anscombe II</option>
+               <option value="anscombe_III">Anscombe III</option>
+               <option value="anscombe_IV">Anscombe IV</option>
+            </select>
+        <div id="scatterplotPartB">
+        </div>
+   <div id = partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+   </div>
+	</div>
+
+    <script type="text/javascript">
+        // Put your part one code here ***********************
+        d3.csv('/data/anscombe_I.csv', function(data) {
+          var csvData1 = data;
+          var title = 'Anscombe I';
+          checkDataset(csvData1);
+          barchart(csvData1);
+          scatterplot(csvData1, title, "#scatterplot");
+          scatterplot(csvData1, title, "#scatterplotSet");
+        });
+        d3.csv('/data/anscombe_II.csv', function(csvData2) {
+           var data = csvData2;
+           checkDataset(csvData2);
+           var title = 'Anscombe II';
+          scatterplot(csvData2, title, "#scatterplotSet");
+        });
+        d3.csv('/data/anscombe_III.csv', function(csvData3) {
+           var data = csvData3;
+           checkDataset(csvData3);
+           var title = 'Anscombe III';
+           scatterplot(csvData3, title, "#scatterplotSet");
+        });
+        d3.csv('/data/anscombe_IV.csv', function(csvData4) {
+           var data = csvData4;
+           checkDataset(csvData4);
+           var title = 'Anscombe IV';
+           scatterplot(csvData4, title, "#scatterplotSet");
+        });
+
+
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+
+      // Put your part two code here ***********************
+      // Part 2 done using the first dataset
+
+      // Here are some relevant constants for use in axes and fig description
+      // these come largely from the class tutorial
+      var w = 700; // Width of our visualization
+      var h = 500; // Height of our visualization
+      var xOffset = 80; // Space for x-axis labels
+      var yOffset = 100; // Space for y-axis labels
+      var margin = 10; // Margin around visualization
+
+      // we can do this because all the datasets are set up the same way
+      // probably shouldn't do if not all the same
+      var vals = ['x', 'y']; // List of data attributes
+      var xVal = vals[0]; // Value to plot on x-axis
+      var yVal = vals[1]; // Value to plot on y-axis
+
+      function barchart(data) {
+         var csvData1 = data;
+         var xScale1 = d3.scale.linear()
+                         .domain([d3.min(csvData1, function(d) {
+                             return parseFloat(d[xVal]);
+                         })-1, d3.max(data, function(d) {
+                             return parseFloat(d[xVal]);
+                         })+1])
+                         .range([xOffset + margin, w - margin]);
+
+         var yScale1 = d3.scale.linear()
+                         .domain([d3.min(data, function(d) {
+                             return parseFloat(d[yVal]);
+                         })-1, d3.max(data, function(d) {
+                             return parseFloat(d[yVal]);
+                         })+1])
+                         .range([h - yOffset - margin, margin]);
+
+         var svg = d3.select("#barchart").append("svg:svg")
+                                            .attr("width", w)
+                                         .attr("height", h);
+
+        // Build axes!
+         // Specify the axis scale and general position
+         var xAxis1 = d3.svg.axis()
+                           .scale(xScale1)
+                           .orient("bottom")
+                           .ticks(5);
+
+         // Add a graphics element to hold the axis we created above (xAxis)
+         var xAxisG1 = svg.append('g')
+                         .attr('class', 'axis')
+                         .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+                         .call(xAxis1);
+
+         // Add a label that shows the user what that axis represents
+         var xLabel1 = svg.append("text")
+                         .attr('class', 'label')
+                         .attr('x', w/2+20)
+                         .attr('y', h - margin/2 -50)
+                         .text(xVal);
+
+         // Repeat for the y-axis
+         var yAxis1 = d3.svg.axis()
+                           .scale(yScale1)
+                           .orient("left")
+                           .ticks(5);
+
+         var yAxisG1 = svg.append('g')
+                         .attr('class', 'axis')
+                         .attr('transform', 'translate(' + xOffset + ', 0)')
+                         .call(yAxis1);
+        // fiddled with label placement a little so that they were
+        // where I thought they looked good
+         var yLabel1 = svg.append("text")
+                         .attr('class', 'label')
+                         .attr('x', xOffset/2-20)
+                         .attr('y', h/2 - 15)
+                         .text(yVal);
+         // make a title
+         var title = svg.append("text")
+                         .attr('class', 'label')
+                         .style("font-size", "22px")
+                         .attr('x', w/2)
+                         .attr('y', 20)
+                         .text('Anscombe I');
+
+
+         // build barchart
+         // got help from the tutorial code
+         bar = svg.selectAll('.rect') // Select elements
+                  .data(csvData1);		// Bind data to elements
+
+         bar.enter().append('svg:rect');	// Create new elements if needed
+
+         // Update our selection
+         bar
+            .attr('x', function(d) { return xScale1(d[xVal]); })
+            .attr("width", 25)
+            .attr('y', function(d) { return yScale1(d[yVal]); })
+            .attr('height', function(d) { return h - yOffset - yScale1(d[yVal]); })
+            .style('fill','purple')// color
+            .attr('r', 0)
+            .transition()
+            .attr('r', 5);
+        }
+
+        // Put your part three & four code here ***********************
+      function scatterplot(data, title, the_div) {
+         var data = data;
+         var title = title;
+         var the_div = the_div;
+         var xScale1 = d3.scale.linear()
+                         .domain([d3.min(data, function(d) {
+                             return parseFloat(d[xVal]);
+                         })-1, d3.max(data, function(d) {
+                             return parseFloat(d[xVal]);
+                         })+1])
+                         .range([xOffset + margin, w - margin]);
+
+         var yScale1 = d3.scale.linear()
+                         .domain([d3.min(data, function(d) {
+                             return parseFloat(d[yVal]);
+                         })-1, d3.max(data, function(d) {
+                             return parseFloat(d[yVal]);
+                         })+1])
+                         .range([h - yOffset - margin, margin]);
+
+         var svg = d3.select(the_div).append("svg:svg")
+                                         .attr("width", w)
+                                         .attr("height", h);
+         var tooltip = d3.select(the_div).append('g')
+                       .attr('class','tooltip')
+                       .style("opacity", 0);
+
+        // Build axes!
+         // Specify the axis scale and general position
+         var xAxis1 = d3.svg.axis()
+                           .scale(xScale1)
+                           .orient("bottom")
+                           .ticks(5);
+
+         // Add a graphics element to hold the axis we created above (xAxis)
+         var xAxisG1 = svg.append('g')
+                         .attr('class', 'axis')
+                         .attr('transform', 'translate(0, ' + (h - yOffset) + ')')
+                         .call(xAxis1);
+
+         // Add a label that shows the user what that axis represents
+         var xLabel1 = svg.append("text")
+                         .attr('class', 'label')
+                         .attr('x', w/2+20)
+                         .attr('y', h - margin/2 -50)
+                         .text(xVal);
+
+         // Repeat for the y-axis
+         var yAxis1 = d3.svg.axis()
+                           .scale(yScale1)
+                           .orient("left")
+                           .ticks(5);
+
+         var yAxisG1 = svg.append('g')
+                         .attr('class', 'axis')
+                         .attr('transform', 'translate(' + xOffset + ', 0)')
+                         .call(yAxis1);
+        // fiddled with label placement a little so that they were
+        // where I thought they looked good
+         var yLabel1 = svg.append("text")
+                         .attr('class', 'label')
+                         .attr('x', xOffset/2-20)
+                         .attr('y', h/2 - 15)
+                         .text(yVal);
+         // make a title
+         var title = svg.append("text")
+                         .attr('class', 'label')
+                         .style("font-size", "22px")
+                         .attr('x', w/2)
+                         .attr('y', 20)
+                         .text(title);
+
+         // build scatterplot
+         // got help from the tutorial code
+         point = svg.selectAll('.point') // Select elements
+                  .data(data); // Bind data to elements
+
+         point.enter().append('svg:circle');	// Create new elements if needed
+
+         // Update our selection
+         point
+            .attr("class","point")
+            .attr('cx', function(d) { return xScale1(d[xVal]); })
+            .attr('cy', function(d) { return yScale1(d[yVal]); })
+            .style('fill','purple')// color
+            .attr('r', 0)
+            .on("mouseover", function(d) {
+              d3.select(this).style("fill", "pink");
+              console.log('out');
+            })
+            .on("mouseout", function(d) {
+              d3.select(this).style("fill", "purple");
+              console.log('out2');})
+            // tried to get prettier tooltips... but they don't work
+            .on("click", function(d) {
+               tooltip.html('x: ' + d[xVal] + ' y: '+ d[yVal])
+                      .style("left", (d3.event.pageX + 10) + "px")
+                      .style("top", (d3.event.pageY - 10) + "px")
+                      .style('opacity',1);
+               console.log("help!");
+            })
+            .on("mousedown", function(d) {
+                $("#scatterLabel").html('x: ' + d[xVal]+ ' y: ' + d[yVal]);
+             })
+            .transition()
+            .attr('r', 5);
+        }
+      // Part 3 & 4 B code here ***********************
+      // use scatterplot function above
+      // function called in section that imports data
+      // code here just updates the scatterplot from the menu
+
+   function updateData(data){
+      d3.csv("/data/"+data+".csv", function(mydata){
+         var mydata = mydata;
+         var title = data;
+         // I was trying to make a more interesting transition,
+         // but it isn't actually working
+         var t = d3.transition()
+                  .duration(8000)
+                  .attr("fill", "black");
+         d3.select("#scatterplotPartB")
+           .select("svg")
+           .selectAll("circle")
+           .transition(t)
+           .duration(5000)
+           .style("fill", "green");
+         d3.select("#scatterplotPartB")
+           .select("svg")
+           .remove();
+         scatterplot(mydata, title, "#scatterplotPartB");
+         //console.log('updateData function');
+         //console.log(mydata);
+      });
+
+   }
+var anscombe_I = "anscombe_I";
+var anscombe_II = "anscombe_II";
+var anscombe_III = "anscombe_III";
+var anscombe_IV = "anscombe_IV";
+//var csvData1 = d3.csv('/data/anscombe_I.csv');
+d3.select('#scatterplotMenu')
+  .on('change', function() {
+    var newData = eval(d3.select(this).property('value'));
+    updateData(newData);
+    });
+
+      // Put your part five code here ***********************
+      var w = 500;
+      // changing the width allows the graphs to be displayed side by side
+      // The rest of the part 5 code is in the part one code to avoid
+      // duplication. It looks like this:
+      // scatterplot(csvData1, title, "#scatterplotSet");
+      // However, data and the title reference the specific dataset.
+    </script>
+</body>
+
+
+</html>
